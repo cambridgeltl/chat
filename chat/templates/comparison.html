@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Cancer Hallmarks Analytics Tool{% endblock %}
+{% block content %}
+
+{% include "comparisonqueryform.html" %}
+
+    <div id="results">
+
+{{ containers }}
+
+      <script>
+{{ chartdata }}
+    window.onload = function() {
+{{ chartinit }}
+    };
+      </script>
+    </div>
+{% endblock %}

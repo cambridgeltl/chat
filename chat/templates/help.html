@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Cancer Hallmarks Analytics Tool{% endblock %}
+{% block content %}
+
+<h1>Cancer Hallmarks Analytics Tool help</h1>
+
+<p>
+The Cancer Hallmarks Analytics Tool (CHAT) allows users to quickly and
+easily analyze the strength of association between terms of interest
+and the hallmarks of cancer (Hanahan and Weinberg 2011;
+<a href="https://www.ncbi.nlm.nih.gov/pubmed/21376230">PubMed</a>,
+<a href="http://www.cell.com/cell/pdf/S0092-8674(11)00127-9.pdf">PDF</a>)
+in the literature based on a text-mining analysis of 26 million PubMed
+abstracts.
+</p>
+
+<h2>Quickstart</h2>
+
+<p>
+To analyze the association of any term with the hallmarks of cancer,
+simply enter the term into the "Query" text box on the
+<a href="/">CHAT homepage</a> and press "Submit".
+</p>
+
+<div class="figure">
+  <img class="example" src="/static/img/search.png">
+  <div class="caption">CHAT query form</div>
+</div>
+
+<p>
+The resulting screen will show a chart summarising the association
+of the query term (below "p53") with the various hallmarks of cancer.
+</p>
+
+<div class="figure">
+  <img class="example" src="/static/img/search-result.png">
+  <div class="caption">CHAT query result</div>
+</div>
+
+<h2>Comparison</h2>
+
+<p>
+To compare the strength of association between two terms with the
+hallmarks of cancer, click on the "Compare" tab on the
+<a href="/">CHAT homepage</a>, enter the two terms in the "Query"
+text boxes and press "Submit".
+</p>
+
+<div class="figure">
+  <img class="example" src="/static/img/compare.png">
+  <div class="caption">CHAT comparison form</div>
+</div>
+
+<p>
+CHAT will then show a chart comparing the strength of association
+of the two terms (below "Mdm2" and "mTOR") with the halmarks of cancer.
+</p>
+
+<div class="figure">
+  <img class="example" src="/static/img/compare-result.png">
+  <div class="caption">CHAT comparison result</div>
+</div>
+
+<h2>Metrics</h2>
+
+<p>
+CHAT supports the following metrics for assessing the strength of
+association between a hallmark (<i>h</i>) and a query (<i>q</i>):
+</p>
+
+<ul>
+  <li><b>count</b>: co-occurrence count <i>c(h,q)</i>, i.e. the
+    number of contexts where both <i>h</i> and <i>q</i> occur</li>
+  <li><b>cprob</b>: conditional probability of <i>h</i> given <i>q</i>: <i>p(h|q)</i>&nbsp;=&nbsp;<i>p(h,q)/p(q)</i></li>
+  <li><b>pmi</b>: pointwise mutual information of <i>h</i> and <i>q</i>: pmi<i>(h,q)</i>&nbsp;=&nbsp;log(<i>p(h,q)/(p(h)p(q))</i>)</li>
+  <li><b>npmi</b>: normalized pointwise mutual information of <i>h</i> and <i>q</i>: npmi<i>(h,q)</i>&nbsp;=&nbsp;pmi<i>(h,q)</i>/-log&nbsp;<i>p(h,q)</i></li>
+</ul>
+
+<p>
+To change the metric to apply, use the <i>Metric</i> selector found
+in both the <i>Search</i> and <i>Compare</i> tabs as well as on the top
+of their respective result pages.
+</p>
+
+<h2>Chart types</h2>
+
+<p>
+CHAT supports a variety of chart types for visualizing results, including
+bar, polar and radar charts. To change the chart type, use the
+<i>Chart</i> selector found in the <i>Search</i> tab and its result page.
+(For comparisons, only column charts are supported.)
+</p>
+
+<h2>Hallmark hierarchy</h2>
+
+<p>
+CHAT organizes cancer-related concepts using a taxonomy based on
+the hallmarks of cancer (Hanahan and Weinberg 2000; 2011) and supports two
+different granularities of analysis:
+</p>
+
+<ul>
+  <li><b>top</b>: the ten top-level classes of the taxonomy, corresponding to the ten hallmarks of Hanahan and Weinberg (2011)</li>
+  <li><b>full</b>: the full taxonomy of 37 classes (see <a href="hallmarks">hallmarks</a>)</li>
+</ul>
+
+<p>
+The <b>full</b> hallmarks provide finer granularity while the <b>top</b>
+hallmarks feature greater reliability to their higher frequency.
+</p>
+
+<p>
+To change the granularity, use the <i>Hallmarks</i> selector found in
+the <i>Search</i> and <i>Compare</i> tabs and on the result pages.
+</p>
+
+<h2>Documents and annotations</h2>
+
+<p>
+To "drill down" from a chart view to the documents and annotations
+serving as its source data, click on the relevant part of the chart.
+</p>
+
+<div class="figure">
+  <img class="example" src="/static/img/drilldown.png">
+  <div class="caption">Drilling down to "p53" and "resisting cell death"</div>
+</div>
+
+<p>
+For example, after querying for "p53", clicking on the segment of the
+chart denoting "resisting cell death" shows summaries of PubMed
+documents relating to the association of p53 with resisting cell
+death.
+</p>
+
+<div class="figure">
+  <img class="example" src="/static/img/p53-and-cell-death.png">
+  <div class="caption">Document summaries for "p53" and "resisting cell death"</div>
+</div>
+
+<p>
+Clicking further on any of the titles gives a visualization of all
+hallmark annotations for that PubMed document.
+</p>
+
+<div class="figure">
+  <img class="example" src="/static/img/annotations.png">
+  <div class="caption">Annotation view for document (PMID 11574421)</div>
+</div>
+
+{% endblock %}

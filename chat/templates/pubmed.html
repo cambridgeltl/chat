@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Cancer Hallmarks Analytics Tool{% endblock %}
+{% block content %}
+
+    <div id="documents">
+{% for id, doc in documents.iteritems() %}
+      <div class="pubmed abstract">
+	<p class="sourcelink"><a href="http://pubmed.com/{{ id }}">See in PubMed</a></p>
+	<div class="abstr">{{ doc.html }}</div>
+      </div>
+{% endfor %}
+    </div>
+
+{% endblock %}

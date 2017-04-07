@@ -1,0 +1,44 @@
+<div id="tabs" class="tabs no-js">
+  <div class="tab active">
+    <div id="queryform" class="tab-content">
+      <form action="" method="get" name="login">
+	<div>
+	  <span>
+	    Query:
+	    <input type="text" size="25" name="q">
+	    {{ hiddenparams }}
+	    <input type="submit" value="Submit">
+    {% if includereset %}
+	    <a class="resetlink button" href="/">Reset</a> {% endif %}
+	  </span>
+	</div>
+	<div>
+	  <span>
+	    Metric:
+	    <select name="measure" onchange="this.form.submit()">
+    {% for m in measures %}
+	      <option value="{{ m }}"{% if measure == m %}
+    selected="selected"{% endif %}>{{ m }}</option> {% endfor %}
+	    </select>
+	  </span>
+	  <span>
+	    Chart:
+	    <select name="chart_type" onchange="this.form.submit()">
+    {% for c in chart_types %}
+	      <option value="{{ c }}"{% if chart_type == c %}
+    selected="selected"{% endif %}>{{ c }}</option> {% endfor %}
+	    </select>
+	  </span>
+	  <span>
+	    Hallmarks:
+	    <select name="hallmarks" onchange="this.form.submit()">
+    {% for h in hallmark_options %}
+	      <option value="{{ h }}"{% if hallmarks == h %}
+    selected="selected"{% endif %}>{{ h }}</option> {% endfor %}
+	    </select>
+	  </span>
+	</div>
+      </form>
+    </div>
+  </div>
+</div>

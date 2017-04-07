@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Cancer Hallmarks Analytics Tool{% endblock %}
+{% block content %}
+    <div id="queryform">
+      <span>
+	<form action="" method="get" name="login">
+          Query:<input type="text" name="q">
+	  <input type="submit" value="Submit">
+	</form>
+      </span>
+    </div>
+    <div id="results">
+      Count: {{ count }}
+    </div>
+{% endblock %}

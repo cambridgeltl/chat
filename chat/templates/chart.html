@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Cancer Hallmarks Analytics Tool{% endblock %}
+{% block content %}
+
+{% include "chartqueryform.html" %}
+
+    <div id="results">
+
+{{ containers }}
+
+{% if not fixedlegend %}
+      <div class="chart-legend" id="chart-legend"></div>
+{% else %}
+      {{ fixedlegend }}
+{% endif %}
+
+      <script>
+{{ chartdata }}
+    window.onload = function() {
+{{ chartinit }}
+{% if not fixedlegend %}
+{{ legend }}
+{% endif %}
+    };
+      </script>
+    </div>
+{% endblock %}

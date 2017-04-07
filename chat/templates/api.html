@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}Cancer Hallmarks Analytics Tool{% endblock %}
+{% block content %}
+    <h1>Cancer Hallmarks Analytics Tool API</h1>
+
+<h2>Querying</h2>
+
+You can query CHAT using the following URL:
+
+<p>
+    <code> http://chat.lionproject.net/chartdata?q=<b>&lt;query&gt;</b>&measure=<b>&lt;measure&gt</b>;&hallmarks=<b>&lt;hallmarks&gt;</b></code>
+</p>
+
+where:
+<ul>
+    <li><b>&lt;query&gt;</b> is the query search string, the search string can include boolean combinations using "AND" and "OR" </li>
+    <li><b>&lt;measure&gt;</b> can either be: "count", "cprop", "pmi", "npmi"</li>
+    <li><b>&lt;hallmarks&gt;</b> can either be: "top", to indicate that the returned results is for the original hallmarks of cancer, or "full" for the entire taxonomy</li>
+</ul>
+
+The following is an example for the query "p53", using the "npmi" measure for the entire taxonomy:
+<p>
+<a href="http://chat.lionproject.net/chartdata?q=p53&measure=npmi&hallmarks=full">http://chat.lionproject.net/chartdata?q=p53&measure=npmi&hallmarks=full</a>
+</p>
+
+
+<h2>Document texts</h2>
+You can get the original text for a given abstract by its <a href="https://www.nlm.nih.gov/bsd/disted/pubmedtutorial/020_830.html">PubMed Identifier</a> using the following:
+<p>
+<code>http://chat.lionproject.net/pubmed/<b>&lt;ID&gt;</b>/text</code>
+</p>
+<p>For example: <a href="http://chat.lionproject.net/pubmed/11574421/text">http://chat.lionproject.net/pubmed/11574421/text</a></p>
+
+<h2>Annotations</h2>
+
+You can get the annotation for a given abstract by its <a href="https://www.nlm.nih.gov/bsd/disted/pubmedtutorial/020_830.html">PubMed Identifier</a> using the following:
+<p>
+<code>http://chat.lionproject.net/pubmed/<b>&lt;ID&gt;</b>/annotations</code>
+<p>
+<p>For example: <a href="http://chat.lionproject.net/pubmed/11574421/annotations">http://chat.lionproject.net/pubmed/11574421/annotations</a></p>
+<p>
+    This would return the annotations in <a href="http://www.json.org/">JSON</a> format where each annotation span contains the following:
+    <ul>
+    <li><b>body:</b> contains the code for the hallmark annotation</li>
+    <li><b>id:</b> the annotation span id in the file</li>
+    <li><b>target:</b> the starting and ending character position of the span, as they occur in the document text (see the previous section for retrieving the text).</li>
+    </ul>
+</p>
+<p>
+    The hallmark codes are as follows:
+
+</p>
+<table>
+  <tr>
+    <th>Code</th>
+    <th>Hallmark</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>activating invasion and metastasis--</td>
+  </tr>
+  <tr>
+    <td>11</td>
+    <td>activating invasion and metastasis--invasion--</td>
+  </tr>
+  <tr>
+    <td>12</td>
+    <td>activating invasion and metastasis--metastasis--</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>avoiding immune destruction--</td>
+  </tr>
+  <tr>
+    <td>21</td>
+    <td>avoiding immune destruction--immune response--</td>
+  </tr>
+  <tr>
+    <td>22</td>
+    <td>avoiding immune destruction--immunosuppression--</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>cellular energetics--</td>
+  </tr>
+  <tr>
+    <td>31</td>
+    <td>cellular energetics--glycolysis/warburg effect--</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>enabling replicative immortality--</td>
+  </tr>
+  <tr>
+    <td>41</td>
+    <td>enabling replicative immortality--immortalization--</td>
+  </tr>
+  <tr>
+    <td>42</td>
+    <td>enabling replicative immortality--senescence--</td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td>evading growth suppressors--</td>
+  </tr>
+  <tr>
+    <td>51</td>
+    <td>evading growth suppressors--by deregulating cell cycle checkpoints--</td>
+  </tr>
+  <tr>
+    <td>511</td>
+    <td>evading growth suppressors--by deregulating cell cycle checkpoints--cell cycle--</td>
+  </tr>
+  <tr>
+    <td>52</td>
+    <td>evading growth suppressors--by evading contact inhibition--</td>
+  </tr>
+  <tr>
+    <td>6</td>
+    <td>genomic instability and mutation--</td>
+  </tr>
+  <tr>
+    <td>61</td>
+    <td>genomic instability and mutation--dna damage--</td>
+  </tr>
+  <tr>
+    <td>611</td>
+    <td>genomic instability and mutation--dna damage--adducts--</td>
+  </tr>
+  <tr>
+    <td>612</td>
+    <td>genomic instability and mutation--dna damage--strand breaks--</td>
+  </tr>
+  <tr>
+    <td>62</td>
+    <td>genomic instability and mutation--dna repair mechanisms--</td>
+  </tr>
+  <tr>
+    <td>63</td>
+    <td>genomic instability and mutation--mutation--</td>
+  </tr>
+  <tr>
+    <td>7</td>
+    <td>inducing angiogenesis--</td>
+  </tr>
+  <tr>
+    <td>71</td>
+    <td>inducing angiogenesis--by deregulating angiogenesis--</td>
+  </tr>
+  <tr>
+    <td>711</td>
+    <td>inducing angiogenesis--by deregulating angiogenesis--angiogenic factors--</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>resisting cell death--</td>
+  </tr>
+  <tr>
+    <td>81</td>
+    <td>resisting cell death--apoptosis--</td>
+  </tr>
+  <tr>
+    <td>82</td>
+    <td>resisting cell death--autophagy--</td>
+  </tr>
+  <tr>
+    <td>83</td>
+    <td>resisting cell death--necrosis--</td>
+  </tr>
+  <tr>
+    <td>9</td>
+    <td>sustaining proliferative signaling--</td>
+  </tr>
+  <tr>
+    <td>91</td>
+    <td>sustaining proliferative signaling--cell cycle--</td>
+  </tr>
+  <tr>
+    <td>92</td>
+    <td>sustaining proliferative signaling--growth factors growth promoting signals--</td>
+  </tr>
+  <tr>
+    <td>921</td>
+    <td>sustaining proliferative signaling--growth factors growth promoting signals--downstream signaling--</td>
+  </tr>
+  <tr>
+    <td>93</td>
+    <td>sustaining proliferative signaling--receptors--</td>
+  </tr>
+  <tr>
+    <td>x</td>
+    <td>tumor promoting inflammation--</td>
+  </tr>
+  <tr>
+    <td>x1</td>
+    <td>tumor promoting inflammation--immune response--</td>
+  </tr>
+  <tr>
+    <td>x2</td>
+    <td>tumor promoting inflammation--inflammation--</td>
+  </tr>
+  <tr>
+    <td>x21</td>
+    <td>tumor promoting inflammation--inflammation--oxidative stress--</td>
+  </tr>
+</table>
+
+{% endblock %}

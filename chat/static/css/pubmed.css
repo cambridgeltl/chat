@@ -1,0 +1,47 @@
+.sourcelink {
+    font-size: 80%;
+    margin-top: 1em;
+}
+
+/* CSS rules adapted from PubMed. */
+
+.pubmed /* body */ {
+    /* font: 62.5%/1.3846 arial,helvetica,clean,sans-serif; */ /* LION change */
+    font-family: arial, helvetica, clean, sans-serif;
+    line-height: 19px;
+    font-size: 14px;
+}
+
+.pubmed.abstract h1 {
+    font-size: 1.231em;
+    font-weight: bold;
+    line-height: 1.125em;
+    margin: .375em 0;
+    margin-bottom: 1.5em;   /* LION change */
+    text-align: left;
+}
+
+.pubmed h4, h5, h6, h3.inline {
+    font-size: 1em;
+    margin: 1.3846em 0 .6923em;
+}
+
+.pubmed.abstract .abstr h4, .pubmed .abstract .keywords h4 {
+    color: #000;
+    font-weight: bold;
+    text-transform: uppercase;
+    float: left;
+    margin: 0 .25em 0 0;
+}
+
+div.result-text {
+}
+
+div.result-title {
+    font-size: 130%;
+}
+
+div.result-item {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}

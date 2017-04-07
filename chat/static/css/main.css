@@ -1,0 +1,190 @@
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+#content {
+    min-height: 30em;
+    margin-top: 5em;
+    margin-bottom: 5em;
+}
+
+#footer {
+    clear: both;
+}
+
+#queryform {
+    margin: auto;
+}
+
+#queryform div {
+    margin: 3px;
+}
+
+#queryform span {
+    white-space: nowrap;
+}
+
+.query-examples {
+    font-size: 80%;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    margin-bottom: 3em;
+    text-align: center;
+}
+
+.resetlink {
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.sourcelink {
+    font-size: 80%;
+    margin-top: 1em;
+}
+
+h1 {
+    font-size: 200%;
+    text-align: center;
+    margin-bottom: 2em;
+}
+
+h2 {
+    font-size: 150%;
+}
+
+h3 {
+    font-size: 130%;
+}
+
+#content td {
+    padding-right: 1em;
+}
+
+#content p {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.error-message {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    background: #ff3300;
+    width: 400px;
+}
+
+#about-chat {
+    text-align: center;
+    font-size: 12px;
+    color: gray;
+    margin-top: 10em;
+}
+
+.copyright {
+    float: right;
+    font-size: 12px;
+    color: gray;
+}
+
+.footerImg {
+    float: auto;
+    height:30px;
+    width:auto;
+    margin-right:10px;
+
+}
+
+div.figure {
+    display: block;
+    max-width: 55%;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div.figure img {
+    max-width: 100%;
+}
+
+div.figure .caption {
+    font-size: 85%;
+    text-align: center;
+}
+
+/* tab styling following http://callmenick.com/post/simple-responsive-tabs-javascript-css */
+
+.tabs {
+    margin: 0 auto;
+    max-width: 55%;
+    margin-bottom: 3em;
+}
+
+.tabs-nav {
+    margin: 0;
+    padding: 0;
+    background-color: #337ab7;
+}
+
+.tabs-nav-link {
+    display: inline-block;
+    padding: 0.3em;
+    margin-left: 3px;
+    margin-top: 3px;
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
+    color: #ccc;
+    background-color: #225584;
+    text-align: center;
+    transition: color 0.3s;
+}
+
+.tabs-nav-link:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
+.tabs-nav-link.active {
+    color: #23527c;
+    background-color: white;
+    text-decoration: none;
+}
+
+.tab {
+    display: none;
+    border: 1px solid #337ab7;
+    border-top: none;
+}
+
+.tab.active {
+    display: block;
+}
+
+.tab-content {
+    padding: 1.5rem;
+}
+
+.tabs.no-js .tabs-nav {
+  display: none;
+}
+
+.tabs.no-js .tab {
+    display: block;
+    margin-bottom: 1.5rem;
+}
+
+.tabs.no-js .tab:last-child {
+    margin-bottom: 0;
+}
+
+.hm {
+    margin-left: 150px;
+}
+

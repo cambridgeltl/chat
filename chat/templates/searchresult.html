@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Cancer Hallmarks Analytics Tool{% endblock %}
+{% block content %}
+    <div id="results">
+    {% for r in results %}
+      <div class="result-item">
+	<div class="result-title"><a href="/pubmed/{{ r.pmid }}">{{ r.title }}</a></div>
+	<div class="result-text">{{ r.text|truncate(200) }}</div>
+      </div>
+{% endfor %}
+    </div>
+{% endblock %}

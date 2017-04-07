@@ -1,0 +1,104 @@
+<div id="tabs" class="tabs no-js">
+  {# Tab implementation following in part http://callmenick.com/post/simple-responsive-tabs-javascript-css #}
+  <div class="tabs-nav">
+    <a href="#" class="tabs-nav-link{% if not compare %} active{% endif %}">Search</a>
+    <a href="#" class="tabs-nav-link{% if compare %} active{% endif %}">Compare</a>
+  </div>
+  <div class="tab{% if not compare %} active{% endif %}">
+    <div id="queryform" class="tab-content">
+      <form action="" method="get" name="login">
+	<div>
+	  <span>
+	    Query:
+	    <input type="text" size="25" name="q">
+	    {{ hiddenparams }}
+	    <input type="submit" value="Submit">
+    {% if includereset %}
+	    <a class="resetlink button" href="/">Reset</a> {% endif %}
+	  </span>
+	</div>
+	<div>
+	  <span>
+	    Metric:
+	    <select name="measure" onchange="this.form.submit()">
+    {% for m in measures %}
+	      <option value="{{ m }}"{% if measure == m %}
+    selected="selected"{% endif %}>{{ m }}</option> {% endfor %}
+	    </select>
+	  </span>
+	  <span>
+	    Chart:
+	    <select name="chart_type" onchange="this.form.submit()">
+    {% for c in chart_types %}
+	      <option value="{{ c }}"{% if chart_type == c %}
+    selected="selected"{% endif %}>{{ c }}</option> {% endfor %}
+	    </select>
+	  </span>
+	  <span>
+	    Hallmarks:
+	    <select name="hallmarks" onchange="this.form.submit()">
+    {% for h in hallmark_options %}
+	      <option value="{{ h }}"{% if hallmarks == h %}
+    selected="selected"{% endif %}>{{ h }}</option> {% endfor %}
+	    </select>
+	  </span>
+	</div>
+      </form>
+    </div>
+{% if term_examples %}
+    <div class="query-examples">
+      <div class="list">
+	Examples:
+{% for e in term_examples %}
+        <a href="/?q={{ e }}&measure={{ measure }}&chart_type={{ chart_type }}"><nobr>{{ e }}</nobr></a>
+{% endfor %}
+      </div>
+    </div>
+{% endif %}
+  </div>
+  <div class="tab{% if compare %} active{% endif %}">
+    <div id="queryform" class="tab-content">
+      <form action="compare" method="get">
+	<div>
+	  <span>
+	    Query:
+	    <input type="text1" size="25" name="q">
+	    <input type="text2" size="25" name="q">
+	    {{ hiddenparams }}
+	    <input type="submit" value="Submit">
+    {% if includereset %}
+	    <a class="resetlink button" href="/">Reset</a> {% endif %}
+	  </span>
+	</div>
+	<div>
+	  <span>
+	    Metric:
+	    <select name="measure" onchange="this.form.submit()">
+    {% for m in measures %}
+	      <option value="{{ m }}"{% if measure == m %}
+    selected="selected"{% endif %}>{{ m }}</option> {% endfor %}
+	    </select>
+	  </span>
+	  <span>
+	    Hallmarks:
+	    <select name="hallmarks" onchange="this.form.submit()">
+    {% for h in hallmark_options %}
+	      <option value="{{ h }}"{% if hallmarks == h %}
+    selected="selected"{% endif %}>{{ h }}</option> {% endfor %}
+	    </select>
+	  </span>
+	</div>
+      </form>
+    </div>
+{% if comparison_examples %}
+    <div class="query-examples">
+      <div class="list">
+	Examples:
+{% for e1, e2 in comparison_examples %}
+        <a href="compare?q={{ e1 }}&q={{ e2 }}&measure={{ measure }}"><nobr>{{ e1 }}/{{ e2 }}</nobr></a>
+{% endfor %}
+      </div>
+    </div>
+{% endif %}
+  </div>
+</div>

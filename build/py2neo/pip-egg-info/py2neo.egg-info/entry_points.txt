@@ -1,0 +1,7 @@
+[console_scripts]
+neoget = py2neo.server:main
+geoff = py2neo.ext.geoff.__main__:main
+cypher = py2neo.cypher.__main__:main
+neoauth = py2neo.password:main
+neobox = py2neo.ext.neobox.__main__:main
+

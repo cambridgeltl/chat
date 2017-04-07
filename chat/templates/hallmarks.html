@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Cancer Hallmarks Analytics Tool{% endblock %}
+{% block content %}
+    <h1>Hallmarks of Cancer</h1>
+
+<p>
+Cancer is a complex disease involving both genetic and epigenetic alterations that affect a large number of genes, proteins and signalling networks during tumor progression. Normal cells require certain characteristics, i.e. hallmarks, in order to become malignant. Hanahan and Weinberg (2000; 2011), have proposed a framework comprising eight hallmarks and two enabling characteristics, as an organizing principle to simplify the diversity of the biological processes leading to cancer.
+</p>
+
+<div class="figure">
+  <img src="/static/img/hoc.svg">
+  <div class="caption">The Hallmarks of Cancer</div>
+</div>
+
+
+<img src="/static/img/sustaining.svg" style='float:left; margin-right: 40px; margin-bottom:25px;'> <h2 class="hm">Sustaining proliferative signaling</h2>
+<h3 class="hm">Proliferative signalling- cell cycle</h3>
+<p class="hm">The progression of biochemical and morphological phases and events that occur in a cell during successive cell replication or nuclear replication events. <a href="http://amigo.geneontology.org/amigo/term/GO:0007049">[GO:0007049]</a></p>
+<h3 class="hm">Growth signals</h3>
+<p class="hm">Any process that results in a change in state or activity of a cell (in terms of movement, secretion, enzyme production, gene expression, etc.) as a result of a growth factor stimulus. <a href="http://amigo.geneontology.org/amigo/term/GO:0071363">[GO:0071363]</a></p>
+<h3 class="hm">Growth signals – downstream signalling</h3>
+<p class="hm">The temporal and mechanistic order of cellular and molecular events. For example, in signal transduction, the second messenger acts downstream to activation of cell membrane receptors.</p>
+<h3 class="hm">Proliferative signalling - receptors</h3>
+<p class="hm">The growth factor receptors (such as EGFR) are cell membrane receptors that after being activated by e.g. a hormone or a growth factor, initiate the signal transduction pathway.</p>
+<BR>
+<img src="/static/img/evading.svg" style='float:left; margin-right: 40px; margin-bottom:25px;'> <h2 class="hm">Evading growth suppressors</h2>
+<h3 class="hm">Deregulating cell cycle</h3>
+<p class="hm">Deregulating the progression of biochemical and morphological phases and events that occur in a cell during successive cell replication or nuclear replication events. <a href="http://amigo.geneontology.org/amigo/term/GO:0007049">[GO:0007049]</a></p>
+<h3 class="hm">Evading contact inhibition</h3>
+<p class="hm">A growth control mechanism by which cells stop growing or dividing depending on the conditions e.g. increased cell density. <a href="http://amigo.geneontology.org/amigo/term/GO:0060242">[GO:0060242]</a></p>
+<BR>
+<img src="/static/img/avoiding.svg" style='float:left; margin-right: 40px; margin-bottom:25px;'> <h2 class="hm">Avoiding immune destruction</h2>
+<h3 class="hm">Immune response</h3>
+<p class="hm">Any immune system process that recognises and defends an organism with a calibrated response against any potential internal or foreign threat. <a href="http://amigo.geneontology.org/amigo/term/GO:0006955">[GO:0006955]</a></p>
+<h3 class="hm">Immunosuppression</h3>
+<p class="hm">Any process that stops, prevents, or reduces the frequency, rate or extent of the immune response, the immunological reaction of an organism to an immunogenic stimulus. <a href="http://amigo.geneontology.org/amigo/term/GO:0050777">[GO:0050777]</a></p>
+<BR>
+<img src="/static/img/enabling.svg" style='float:left; margin-right: 40px; margin-bottom:25px;'> <h2 class="hm">Enabling replicative immortality</h2>
+<h3 class="hm">Immortalization</h3>
+<p class="hm"> A phenomenon under which the modifications in a cell enable it to reproduce indefinitely. <a href="http://amigo.geneontology.org/amigo/term/GO:0020021">[GO:0020021]</a></p>
+<h3 class="hm">Senescence</h3>
+<p class="hm">A biological aging process that involves gradual dysfunctional changes by which a cell become less capable of maintaining physiological functions e.g. normal cells lose the ability to divide through irreversible cell cycle arrest. <a href="http://amigo.geneontology.org/amigo/term/GO:0090398">[GO:0090398]</a></p>
+<BR>
+<img src="/static/img/tumor-promoting.svg" style='float:left; margin-right: 40px; margin-bottom:25px;'> <h2 class="hm">Tumor-promoting inflammation</h2>
+<h3 class="hm">Inflammation</h3>
+<p class="hm">The immediate defensive reaction of body tissues to infection or injury caused by chemical or physical agents. <a href="http://amigo.geneontology.org/amigo/term/GO:0006954">[GO:0006954]</a></p>
+<h3 class="hm">Oxidative stress</h3>
+<p class="hm">A condition characterized by an imbalance between the systemic manifestation of reactive oxygen species and the ability of a biological system to readily detoxify the reactive intermediates or repair the resulting damage to cellular environment.<a href="http://www.ontobee.org/ontology/MP?iri=http://purl.obolibrary.org/obo/MP_0003674">[MP:0003674]</a></p>
+<BR>
+<img src="/static/img/activating.svg" style='float:left; margin-right: 40px; margin-bottom:25px;'> <h2 class="hm">Activating Invasion and metastasis</h2>
+<h3 class="hm">Invasion</h3>
+<p class="hm"> The infiltration or penetration of neoplasms to actively destroy the surrounding tissues of its primary site. <a href="http://amigo.geneontology.org/amigo/term/GO:0044409">[GO:0044409]</a></p>
+<h3 class="hm">Metastasis</h3>
+<p class="hm"> The transfer of a neoplasm from one organ or part of the body to another remote from the primary site. <a href="https://meshb.nlm.nih.gov/#/record/ui?ui=D009362">[MeSH:D009362]</a></p>
+<BR>
+<img src="/static/img/inducing.svg" style='float:left; margin-right: 40px; margin-bottom:25px;'> <h2 class="hm">Inducing angiogenesis</h2>
+<h3 class="hm">Deregulating angiogenesis</h3>
+<p class="hm">A physiological process of blood vessel formation through which new vessels emerge from the proliferation of pre-existing blood vessels. <a href="http://amigo.geneontology.org/amigo/term/GO:0001525">[GO:0001525]</a></p>
+<h3 class="hm">Angiogenic factors</h3>
+<p class="hm">Multiple factors including soluble growth and differentiative factors, extracellular matrix components, membrane-bound receptors, and intracellular signaling molecules which contribute to angiogenesis. For example: VEGF, FGF etc.</p>
+<BR>
+<img src="/static/img/genomic.svg" style='float:left; margin-right: 40px; margin-bottom:25px;'> <h2 class="hm">Genomic instability and mutation</h2>
+<h3 class="hm">DNA damage</h3>
+<p class="hm">Drug-, chemical-, radiation-induced, or spontaneous injuries to the chemical structure of DNA e.g. break in the strand of DNA. <a href="https://ncit.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI_Thesaurus&version=16.10e&code=C16507&ns=NCI_Thesaurus">[ncithesaurus:C16507]</a></p>
+<h3 class="hm">DNA adducts</h3>
+<p class="hm">DNA adducts are formed after covalent bonding between a molecule e.g. chemical and the DNA macromolecule that may interfere with DNA replication and repair. <a href="https://ncit.nci.nih.gov/ncitbrowser//ConceptReport.jsp?dictionary=NCI%20Thesaurus&code=C25825&type=null&sortBy=name#SynonymsDetails">[ncithesaurus:C25825]</a></p>
+<h3 class="hm">DNA strand breaks</h3>
+<p class="hm">A DNA strand break involves one or more disruptions of the covalent linkages among phosphor-deoxyribose moieties within the sugar-phosphate backbone in one or in both strands of a DNA molecule. <a href="https://ncit.nci.nih.gov/ncitbrowser//ConceptReport.jsp?dictionary=NCI%20Thesaurus&code=C25830&type=null&sortBy=name#SynonymsDetails">[ncithesaurus:C25830]</a></p>
+<h3 class="hm">DNA repair</h3>
+<p class="hm">A collection of cellular processes that maintain the original DNA sequence by identifying and correcting the damage to the DNA molecule. For example; base excision repair, double-strand break repair, and mismatch repair etc. <a href="http://amigo.geneontology.org/amigo/term/GO:0006281">[GO:0006281]</a></p>
+<h3 class="hm">Mutation</h3>
+<p class="hm">Any permanent change in the DNA sequence of a cell or the genome of an organism, which can result from radiation, viral infection, transposition, mutagenic chemicals and/or from errors during DNA replication or meiosis. <a href="https://ncit.nci.nih.gov/ncitbrowser//ConceptReport.jsp?dictionary=NCI%20Thesaurus&code=C45576&type=null&sortBy=name#SynonymsDetails">[ncithesaurus:C45576]</a></p>
+<BR>
+<img src="/static/img/resisting.svg" style='float:left; margin-right: 40px; margin-bottom:25px;'> <h2 class="hm">Resisting cell death</h2>
+<h3 class="hm">Apoptosis</h3>
+<p class="hm">A highly regulated and controlled cell death process which begins when a cell receives an internal (e.g. DNA damage) or external signal (e.g. an extracellular death ligand), and proceeds through a series of biochemical events (signaling pathway phase) which trigger an execution phase. <a href="http://amigo.geneontology.org/amigo/term/GO:0006915">[GO:0006915]</a></p>
+<h3 class="hm">Autophagy</h3>
+<p class="hm">The natural process in which cells digest or disassemble the unnecessary or dysfunctional cellular components; thereby allows for both recycling of macromolecular constituents under conditions of cellular stress and remodeling the intracellular structure for cell differentiation. <a href="http://amigo.geneontology.org/amigo/term/GO:0006914">[GO:0006914]</a></p>
+<h3 class="hm">Necrosis</h3>
+<p class="hm">A premature cell death that involves unregulated digestion of cell component as a result of infection, toxins or trauma. It is morphologically characterized by an increasingly translucent cytoplasm, swelling of organelles, minor ultrastructural modifications of the nucleus […] and increased cell volume (oncosis), culminating in the disruption of the plasma membrane and subsequent loss of intracellular contents. <a href="http://amigo.geneontology.org/amigo/term/GO:0070265">[GO:0070265]</a></p>
+<BR>
+<img src="/static/img/deregulating.svg" style='float:left; margin-right: 40px; margin-bottom:25px;'> <h2 class="hm">Deregulating cellular energetics</h2>
+<h3 class="hm">Glycolysis/ Warburg effect</h3>
+<p class="hm"> The chemical reactions and pathways resulting in the breakdown of a carbohydrate into pyruvate, with the concomitant production of a small amount of ATP and the reduction of NAD(P) to NAD(P)H. <a href="http://amigo.geneontology.org/amigo/term/GO:0006096">[GO:0006096]</a></p>
+
+{% endblock %}
