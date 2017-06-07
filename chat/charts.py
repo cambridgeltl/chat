@@ -1,3 +1,5 @@
+import json
+
 from collections import OrderedDict
 
 from logging import debug
@@ -10,6 +12,13 @@ from hallmarks import top_hallmark_colors, full_hallmark_colors
 
 # Chart horizontal position values
 POS_ONLY, POS_LEFT, POS_RIGHT = range(3)
+
+
+def key_dumps(obj):
+    """Return serialized JSON keys and values without wrapping object."""
+    s = json.dumps(obj, sort_keys=True, indent=4, separators=(',', ': '))
+    # first and last lines will be "{" and "}" (resp.), strip these
+    return '\n'.join(s.split('\n')[1:-1])
 
 
 class Chart(object):
@@ -178,22 +187,34 @@ class Chart(object):
 	    legend{0}.innerHTML = legendstr{0};
         '''.format(self.idx)
 
-    def scalestr(self):
+    def scalestr(self, chart_type):
         """Return string for fixing step bug in chartjs."""
-        reverse_configuration = ''
-        if self.position == POS_LEFT:    # reversed
-            reverse_configuration = '''
-                    xAxes: [{
-                        ticks: {
-                          reverse: true,
-                        }
-                    }],
-                    yAxes: [{
-                        ticks: {
-                            fontSize: 10
-                        }
-                    }],
-            '''
+        if chart_type not in ('horizontalBar', ):
+            axis_configuration = ''
+        else:
+            axis_configuration = {
+                'xAxes': [{
+                    'ticks': {
+                        'beginAtZero': True,
+                    }
+                }],
+                'yAxes': [{
+                    'ticks': {
+                        'beginAtZero': True,
+                        'fontSize': 10,
+                    }
+                }]
+            }
+            if self.measure in ('npmi', ):
+                axis_configuration['xAxes'][0]['ticks']['max'] = 1.0
+                axis_configuration['yAxes'][0]['ticks']['max'] = 1.0
+            if self.position == POS_LEFT:
+                axis_configuration['xAxes'][0]['ticks']['reverse'] = True
+            axis_configuration = key_dumps(axis_configuration)
+
+        if axis_configuration:
+            axis_configuration = axis_configuration + ','
+
         return '''
             options.scales = {{
                 {0}
@@ -206,7 +227,7 @@ class Chart(object):
                     }}
                 }},
             }};
-        '''.format(reverse_configuration)
+        '''.format(axis_configuration)
 
     def default_initstr(self, chart_type):
         return '''
@@ -214,12 +235,18 @@ class Chart(object):
             {3}
             var ctx{0} = document.getElementById("chart-{0}").getContext("2d");
             {4}
+            options.hover = {{
+              onHover: function(e) {{
+                var cnv = document.getElementById("chart-{0}");
+                cnv.style.cursor = e[0] ? "pointer" : "default";
+              }}
+            }};
             window.chart{0} = new Chart(ctx{0}, {{
                 type: "{1}",
                 data: chartData{0},
                 options: options
             }});
-        '''.format(self.idx, chart_type, pretty_dumps(self.options()), self.scalestr(), self.contextstr())
+        '''.format(self.idx, chart_type, pretty_dumps(self.options()), self.scalestr(chart_type), self.contextstr())
 
     def initstr(self):
         """Return string for initializing chart in JS."""
