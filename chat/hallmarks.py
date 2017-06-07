@@ -35,7 +35,7 @@ hallmark_codes = OrderedDict([
     ('921', 'growth signals--downstream signaling'),
     ('93', 'proliferative signaling--receptors'),
     ('x', 'TUMOR PROMOTING INFLAMMATION'),
-    ('x1', 'immune response'),
+    ('x1', 'immune response to inflammation'),
     ('x2', 'inflammation'),
     ('x21', 'oxidative stress'),
 ])
