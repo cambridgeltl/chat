@@ -53,7 +53,7 @@ text boxes and press "Submit".
 
 <p>
 CHAT will then show a chart comparing the strength of association
-of the two terms (below "Mdm2" and "mTOR") with the halmarks of cancer.
+of the two terms (below "Mdm2" and "mTOR") with the hallmarks of cancer.
 </p>
 
 <div class="figure">
@@ -114,6 +114,34 @@ frequently in the literature than <i>q<sub>2</sub></i> (e.g.
 <i>c(h,q<sub>1</sub>)</i> &gt; <i>c(h,q<sub>2</sub>)</i> does not
 necessarily indicate a stronger association of hallmark <i>h</i>
 with <i>q<sub>1</sub></i> than with <i>q<sub>2</sub></i>.
+</p>
+
+<h3 id="conditional-probability">Conditional probability</h3>
+
+<p>
+The conditional probability <i>p(h|q)</i> of a hallmark <i>h</i>
+occurring in a context where a query term <i>q</i> has occurred is
+defined as the co-occurrence count <i>c(h,q)</i> divided by the
+overall count of the query term <i>c(q)</i>.
+</p>
+
+<p>
+Unlike <b>count</b> (see above), the <b>cprob</b> metric takes into
+account the overall frequency of the query term, normalizing by this
+value. This allows more meaningful comparison of <b>cprob</b>
+values across queries where the terms are not discussed in the
+literature with similar frequency.
+</p>
+
+<p>
+For example,
+<a href="/compare?q=Akt&q=autotaxin&measure=cprob">this comparison</a>
+shows that "<a href="http://pubmed.com/?term=autotaxin">autotaxin</a>"
+has a much higher <b>cprob</b> value with <i>Invasion and
+metastasis</i> than "<a href="http://pubmed.com/?term=Akt">Akt</a>"
+does, despite the latter much more common term having a higher
+co-occurrence count with this hallmark (see
+<a href="/compare?q=Akt&q=autotaxin&measure=count">here</a>)
 </p>
 
 <h2 id="chart-types">Chart types</h2>
