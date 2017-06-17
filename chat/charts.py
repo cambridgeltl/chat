@@ -280,7 +280,8 @@ class RadarChart(Chart):
 
 class BarChart(Chart):
     def __init__(self, title, data, query=None, **kwargs):
-        super(BarChart, self).__init__(title, data, query, **kwargs)
+        super(BarChart, self).__init__(title, data, query,
+                                       clip_range=(0, None), **kwargs)
 
     def initstr(self):
         return self.default_initstr('bar')
