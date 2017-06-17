@@ -14,7 +14,7 @@ in the literature based on a text-mining analysis of 26 million PubMed
 abstracts.
 </p>
 
-<h2>Quickstart</h2>
+<h2 id="quickstart">Quickstart</h2>
 
 <p>
 To analyze the association of any term with the hallmarks of cancer,
@@ -37,7 +37,7 @@ of the query term (below "p53") with the various hallmarks of cancer.
   <div class="caption">CHAT query result</div>
 </div>
 
-<h2>Comparison</h2>
+<h2 id="comparison">Comparison</h2>
 
 <p>
 To compare the strength of association between two terms with the
@@ -61,7 +61,7 @@ of the two terms (below "Mdm2" and "mTOR") with the halmarks of cancer.
   <div class="caption">CHAT comparison result</div>
 </div>
 
-<h2>Metrics</h2>
+<h2 id="metrics">Metrics</h2>
 
 <p>
 CHAT supports the following metrics for assessing the strength of
@@ -72,17 +72,51 @@ association between a hallmark (<i>h</i>) and a query (<i>q</i>):
   <li><b>count</b>: co-occurrence count <i>c(h,q)</i>, i.e. the
     number of contexts where both <i>h</i> and <i>q</i> occur</li>
   <li><b>cprob</b>: conditional probability of <i>h</i> given <i>q</i>: <i>p(h|q)</i>&nbsp;=&nbsp;<i>p(h,q)/p(q)</i></li>
-  <li><b>pmi</b>: pointwise mutual information of <i>h</i> and <i>q</i>: pmi<i>(h,q)</i>&nbsp;=&nbsp;log(<i>p(h,q)/(p(h)p(q))</i>)</li>
-  <li><b>npmi</b>: normalized pointwise mutual information of <i>h</i> and <i>q</i>: npmi<i>(h,q)</i>&nbsp;=&nbsp;pmi<i>(h,q)</i>/-log&nbsp;<i>p(h,q)</i></li>
+  <li><b>pmi</b>: pointwise mutual information of <i>h</i> and <i>q</i>: pmi&thinsp;<i>(h,q)</i>&nbsp;=&nbsp;log<sub>2</sub>&thinsp;(<i>p(h,q)/(p(h)p(q))</i>)</li>
+  <li><b>npmi</b>: normalized pointwise mutual information of <i>h</i> and <i>q</i>: npmi&thinsp;<i>(h,q)</i>&nbsp;=&nbsp;pmi&thinsp;<i>(h,q)</i>/-log<sub>2</sub>&nbsp;<i>p(h,q)</i></li>
 </ul>
 
 <p>
 To change the metric to apply, use the <i>Metric</i> selector found
 in both the <i>Search</i> and <i>Compare</i> tabs as well as on the top
-of their respective result pages.
+of their respective result pages. For interpretation of the metrics, see
+the following sections.
 </p>
 
-<h2>Chart types</h2>
+<h3 id="count">Count</h3>
+
+<p>
+The value <i>c(h,q)</i> of the <b>count</b> metric for a hallmark
+<i>h</i> and a query <i>q</i> is simply the number of contexts where
+both <i>h</i> and <i>q</i> occur.  While the count metric is easy to
+understand, direct comparisons of count values can be misleading
+because raw co-occurrence counts do not normalize over the number of
+times that <i>h</i> and <i>q</i> occur overall.
+</p>
+
+<p>
+For example, if hallmark <i>h<sub>1</sub></i> is discussed in the
+literature more often than <i>h<sub>2</sub></i> (e.g. <i>Invasion and
+metastasis</i> compared to <i>Replicative immortality</i>), then a
+query <i>q</i> may be more strongly (statistically) associated with
+<i>h<sub>2</sub></i> than <i>h<sub>1</sub></i> even if
+<i>c(h<sub>1</sub>,q)</i> is greater than <i>c(h<sub>2</sub>,q)</i>:
+the larger co-occurrence count may simply reflect <i>h<sub>1</sub></i>
+being more frequent.
+</p>
+
+<p>
+Similarly, for two queries <i>q<sub>1</sub></i>
+and <i>q<sub>2</sub></i>, if <i>q<sub>1</sub></i> occurs more
+frequently in the literature than <i>q<sub>2</sub></i> (e.g.
+"<a href="http://pubmed.com/?term=TP53">TP53</a>" vs.
+"<a href="http://pubmed.com/?term=BRCA2">BRCA2</a>"),
+<i>c(h,q<sub>1</sub>)</i> &gt; <i>c(h,q<sub>2</sub>)</i> does not
+necessarily indicate a stronger association of hallmark <i>h</i>
+with <i>q<sub>1</sub></i> than with <i>q<sub>2</sub></i>.
+</p>
+
+<h2 id="chart-types">Chart types</h2>
 
 <p>
 CHAT supports a variety of chart types for visualizing results, including
@@ -91,7 +125,7 @@ bar, polar and radar charts. To change the chart type, use the
 (For comparisons, only column charts are supported.)
 </p>
 
-<h2>Hallmark hierarchy</h2>
+<h2 id="hallmark-hierarchy">Hallmark hierarchy</h2>
 
 <p>
 CHAT organizes cancer-related concepts using a taxonomy based on
@@ -114,7 +148,7 @@ To change the granularity, use the <i>Hallmarks</i> selector found in
 the <i>Search</i> and <i>Compare</i> tabs and on the result pages.
 </p>
 
-<h2>Documents and annotations</h2>
+<h2 id="documents-and-annotations">Documents and annotations</h2>
 
 <p>
 To "drill down" from a chart view to the documents and annotations
