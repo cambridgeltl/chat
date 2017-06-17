@@ -189,9 +189,15 @@ class Chart(object):
 
     def scalestr(self, chart_type):
         """Return string for fixing step bug in chartjs."""
-        if chart_type not in ('horizontalBar', ):
-            axis_configuration = ''
-        else:
+        if chart_type in ('bar', ):
+            axis_configuration = {
+                'xAxes': [{
+                    'ticks': {
+                        'autoSkip': False,
+                    },
+                }],
+            }
+        elif chart_type in ('horizontalBar', ):
             axis_configuration = {
                 'xAxes': [{
                     'ticks': {
@@ -210,10 +216,11 @@ class Chart(object):
                 axis_configuration['yAxes'][0]['ticks']['max'] = 1.0
             if self.position == POS_LEFT:
                 axis_configuration['xAxes'][0]['ticks']['reverse'] = True
-            axis_configuration = key_dumps(axis_configuration)
+        else:
+            axis_configuration = ''
 
         if axis_configuration:
-            axis_configuration = axis_configuration + ','
+            axis_configuration = key_dumps(axis_configuration) + ','
 
         return '''
             options.scales = {{
