@@ -121,8 +121,6 @@ def pubmed_annotations(id_):
 def search():
     terms, hallmarks = get_query_terms(), get_hallmark_terms()
     results = db_controller.searchTextAndHallmarks(terms[0], hallmarks, 100)
-    if not results:
-        return 'No results for {}'.format(terms)    # TODO
     # Add PMID based on sentence ID. By convention, sentence IDs are
     # of the form <PMID>-<SENTIDX>.
     for r in results:
@@ -134,7 +132,11 @@ def search():
         except KeyError:
             # Document missing. TODO: better resolution?
             r['title'] = ''
-    template_args = { 'results': results }
+    template_args = {
+        'term': terms[0],
+        'hm': [ hallmark_codes.get(hm) for hm in hallmarks ],
+        'results': results
+    }
     return render_template_with_globals('searchresult.html', template_args)
 
 @app.route('/chartdata')

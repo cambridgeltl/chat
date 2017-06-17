@@ -7,6 +7,8 @@
 	<div class="result-title"><a href="/pubmed/{{ r.pmid }}">{{ r.title }}</a></div>
 	<div class="result-text">{{ r.text|truncate(200) }}</div>
       </div>
-{% endfor %}
+    {% else %}
+      No results for {{ term }} and {{ hm | join(', ') }}.
+    {% endfor %}
     </div>
 {% endblock %}
