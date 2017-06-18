@@ -144,6 +144,32 @@ co-occurrence count with this hallmark (see
 <a href="/compare?q=Akt&q=autotaxin&measure=count">here</a>)
 </p>
 
+<h3 id="pointwise-mutual-information">Pointwise mutual information</h3>
+
+<p>
+Pointwise mutual information <b>pmi</b>&thinsp;<i>(h,q)</i> is an
+information-theoretic metric of association strength that measures how
+often a hallmark <i>h</i> and a query <i>q</i> occur together compared
+to how often they would be expected to co-occur if their occurrences
+were independent (i.e. if they only co-occurred at random).
+</p>
+
+<p>
+<b>pmi</b>&thinsp;<i>(h,q)</i> is defined as base-2 logarithm (measuring
+information in bits) of of the probability of co-occurrence
+<i>p(h,q)</i> divided by the product of the occurrence probabilities
+<i>p(h)p(q)</i>. These probabilities are derived directly from the
+counts (see above).
+</p>
+
+<p>
+<b>pmi</b> accounts for the overall frequency of both the query and
+the hallmark and its values are interpretable in that
+<b>pmi</b>&thinsp;<i>(h,q)</i> = 0 when <i>p</i> and <i>q</i> are
+independent, &gt; 0 when they co-occur more often than expected from
+random co-occurrence (and &lt; 0 when less).
+</p>
+
 <h2 id="chart-types">Chart types</h2>
 
 <p>
