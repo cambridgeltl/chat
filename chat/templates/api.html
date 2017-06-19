@@ -3,6 +3,30 @@
 {% block content %}
     <h1>Cancer Hallmarks Analytics Tool API</h1>
 
+<h2>Limits</h2>
+
+<p>
+  We request that users of the API do not exceed the following rate limits
+  for programmatic access:
+</p>
+
+<ul>
+  <li>No more than one request per NN seconds</li>
+  <li>No more than NN total requests per day</li>
+</ul>
+
+<p>
+  If these limits are exceeded, the application may return a response
+  with the status code 429 ("Too Many Requests"). We ask users to
+  honor these limits, abuse may result in blacklisting.
+</p>
+
+<p>
+  We are happy to provide support and alternatives for academic users
+  that require higher numbers of requests. If you fall into this
+  category, please feel free to contact us by email.
+</p>
+
 <h2>Querying</h2>
 
 You can query CHAT using the following URL:
