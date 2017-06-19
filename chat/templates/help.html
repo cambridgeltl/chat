@@ -167,7 +167,34 @@ counts (see above).
 the hallmark and its values are interpretable in that
 <b>pmi</b>&thinsp;<i>(h,q)</i> = 0 when <i>p</i> and <i>q</i> are
 independent, &gt; 0 when they co-occur more often than expected from
-random co-occurrence (and &lt; 0 when less).
+random co-occurrence, and &lt; 0 when less often (negative association).
+</p>
+
+<h3 id="normalized-pointwise-mutual-information">Normalized pointwise mutual information</h3>
+
+<p>
+While a <b>pmi</b> value of zero indicates no association (see above),
+values of the metric for positive associations can be difficult to
+interpret and compare as the maximum <b>pmi</b>&thinsp;<i>(h,q)</i>
+value increases when the query terms <i>q</i> and hallmarks <i>h</i>
+become less common (see e.g.
+<a href="https://nlp.stanford.edu/fsnlp/">Manning and Sch&uuml;tze 1999</a>,
+Sec 5.4).
+</p>
+
+<p>
+The <b>npmi</b> metric normalizes <b>pmi</b> by dividing by the negative
+log probability of co-occurrence -log<sub>2</sub>&nbsp;<i>p(h,q)</i>,
+which constrains its values to the range [-1, 1].
+</p>
+
+<p>
+<b>npmi</b> maintains the benefits of <b>pmi</b> but is also more easily
+interpreted and compared. Regardless of the overall frequency of
+<i>h</i> and <i>q</i>, a <b>npmi</b>&thinsp;<i>(h,q)</i> value of -1
+indicates no co-occurrence, 0 a frequency of co-occurrence matching
+random (no association, as for <b>pmi</b>) and 1 complete co-occurrence
+(perfect association).
 </p>
 
 <h2 id="chart-types">Chart types</h2>
