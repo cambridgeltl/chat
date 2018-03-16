@@ -52,10 +52,10 @@ class DataController:
         result = self.interface.search(query, "text", maxReturnLimit)
         return result
 
-    def searchTextAndHallmarks(self, query, hallmarks, maxReturnLimit, expandHallmarks=True):
+    def searchTextAndHallmarks(self, query, hallmarks, count=100, offset=0, expandHallmarks=True):
         query = QueryFormatter.formatQuery(query)
         hallmarksField = "hallmarks"
-        result = self.interface.searchGivenHallmarks(query, hallmarks, hallmarksField, maxReturnLimit)
+        result = self.interface.searchGivenHallmarks(query, hallmarks, hallmarksField, count, offset)
         return result
 
     def close(self):
@@ -83,7 +83,7 @@ def test():
         print "%s:%d" % (h,res[h])
 
     print "--"*10
-    q = "a"
+    q = "asbestos"
     [numSent,res]= controller.getHallmarksForQuery(q,True)
     print "hallmarks distribution for query '%s' over %d matching sentences " % (q,numSent)
     print str(res)
@@ -97,8 +97,16 @@ def test():
     #res = controller.searchTextAndHallmarks("p53", ["x"], 1000)
     #print "retruned search for [x] hits:%d" % len(res)
 
-    #res = controller.searchTextAndHallmarks("p53",["x", "61"], 1000)
-    #print "retruned search for [x, 61] hits:%d" % len(res)
+    res = controller.searchTextAndHallmarks("disease",["1"], count=10,offset=0)
+    print "retruned search for [x] hits:%d" % len(res)
+    for r in res:
+        print(str(r))
+
+    res = controller.searchTextAndHallmarks("disease", ["1"], count=10, offset=1)
+    print
+    "retruned search for [x] hits:%d" % len(res)
+    for r in res:
+        print(str(r))
     
     #for r in res:
 	#print r["id"] + ": " + str(r["hallmarks"])

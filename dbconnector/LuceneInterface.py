@@ -99,7 +99,7 @@ class LuceneInterface:
             result.append(record)
         return result
 
-    def searchGivenHallmarks(self, query, hallmarksList, hallmarksField, maxReturnLimit):
+    def searchGivenHallmarks(self, query, hallmarksList, hallmarksField, count=100, offset=0):
         qList = [query]
         qList.extend(hallmarksList)
 	#print(qList)
@@ -111,9 +111,9 @@ class LuceneInterface:
         #print(flagList)
         qp = MultiFieldQueryParser.parse(Version.LUCENE_CURRENT, qList, fList, flagList, self.analyzer)
         #print (qp)
-        hits = self.searcher.search(qp, maxReturnLimit)
+        hits = self.searcher.search(qp, offset+count)
         result = []
-        for hit in hits.scoreDocs:
+        for hit in hits.scoreDocs[offset:]:
             record = dict()
             doc = self.searcher.doc(hit.doc)
             record["id"] = doc.get("id")
