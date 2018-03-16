@@ -47,7 +47,7 @@ class DataController:
                 hmCounts[hm] = self.interface.getIntersectionCount(query, hm, "text", hallmarksField)
         return [queryReturnCount,hmCounts]
 
-    def search(self,query, maxReturnLimit):
+    def search(self,query, maxReturnLimit,count=100, offset=0):
         query = QueryFormatter.formatQuery(query)
         result = self.interface.search(query, "text", maxReturnLimit)
         return result

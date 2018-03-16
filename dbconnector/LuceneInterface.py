@@ -84,11 +84,11 @@ class LuceneInterface:
         return collector.getTotalHits()
 
     # Return a list of records, where each record is a dictionary; the keys are the the field names in lucene.
-    def search(self, query, field, maxReturnLimit):
+    def search(self, query, field, count=100, offset=0):
         qp = QueryParser(Version.LUCENE_CURRENT, field, WhitespaceAnalyzer(Version.LUCENE_CURRENT)).parse(query)
-        hits = self.searcher.search(qp, maxReturnLimit)
+        hits = self.searcher.search(qp, offset+count)
         result = []
-        for hit in hits.scoreDocs:
+        for hit in hits.scoreDocs[offset:]:
             record = dict()
             doc = self.searcher.doc(hit.doc)
             record["id"] = doc.get("id")
