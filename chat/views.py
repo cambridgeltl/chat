@@ -17,7 +17,7 @@ from chat import db_controller
 from chat import app
 
 from significance import term_significance
-from hallmarks import hallmark_codes, top_hallmark_codes
+from hallmarks import *
 from legends import get_legend
 
 from config import DEFAULT_CHART, DEFAULT_MEASURE, DEBUG, DEVEL
@@ -62,6 +62,7 @@ def hallmarks():
 ### Dynamic views
 
 
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -71,6 +72,26 @@ def index():
     else:
         return generate_charts(terms, measure=getarg('measure'),
                                chart_type=getarg('chart_type'))
+
+
+
+@app.route('/metadata')
+def metadata():
+    metadata = fill_template_arguments({})
+    metadata['term_examples'] = example_terms
+    metadata['comparison_examples'] = example_pairs
+    metadata['full_hallmark_codes'] = hallmark_codes
+    metadata['top_hallmark_codes'] = top_hallmark_codes
+    metadata['top_hallmark_colors'] = top_hallmark_colors
+    metadata['full_hallmark_colors'] = full_hallmark_colors
+
+    response = app.response_class(
+            response=json.dumps(metadata),
+            status=200,
+            mimetype='application/json'
+            )
+    return response
+
 
 @app.route('/compare')
 def compare():
@@ -117,10 +138,21 @@ def pubmed_text(id_):
 def pubmed_annotations(id_):
     return pretty_dumps(pubmed_ann_store.get_spans(id_, minimize=True))
 
+
 @app.route('/search')
 def search():
+
+    pmids = get_doc_pmids() 
+    
     terms, hallmarks = get_query_terms(), get_hallmark_terms()
-    results = db_controller.searchTextAndHallmarks(terms[0], hallmarks, 100)
+    results = []
+    if len(pmids) == 0:
+	results = db_controller.searchTextAndHallmarks(terms[0], hallmarks, 100)
+	#results = db_controller.searchTextAndHallmarks(terms[0], hallmarks, count=100,offset=0)
+    else:
+	#results = db_controller.searchPMIDs(pmids, count=100,offset=0)
+	pass
+
     # Add PMID based on sentence ID. By convention, sentence IDs are
     # of the form <PMID>-<SENTIDX>.
     for r in results:
@@ -137,11 +169,20 @@ def search():
         'hm': [ hallmark_codes.get(hm) for hm in hallmarks ],
         'results': results
     }
-    return render_template_with_globals('searchresult.html', template_args)
+    response = app.response_class(
+            response=json.dumps(template_args),
+            status=200,
+            mimetype='application/json'
+            )
+    return response
+    #return render_template_with_globals('searchresult.html', template_args)
+
+
 
 @app.route('/chartdata')
 def chart_data():
     # TODO: eliminate duplication with generate_charts()
+    asjson = getarg('asjson',False)
     terms = get_query_terms()
     if not terms:
         return 'No query terms'
@@ -160,20 +201,35 @@ def chart_data():
         else:
             return '{:.4f}'.format(v)
 
-    fields = []
-    for term in terms:
-        fields.append((term, measure_name))
-        term_total = int(stats.count(term, None))
-        values = [
-            (hm, fmt(m(term, hm))) for hm in stats[term] if hm is not None
-        ]
-        fields.extend(values)
-        fields.append([])
-    return Response(
-        response='\n'.join('\t'.join(f) for f in fields),
-        status=200,
-        mimetype="text/plain",    # TODO make parameter?
-    )
+    if not asjson:
+        fields = []
+        for term in terms:
+            fields.append((term, measure_name))
+            term_total = int(stats.count(term, None))
+            values = [(hm, fmt(m(term, hm))) for hm in stats[term] if hm is not None]
+            fields.extend(values)
+            fields.append([])
+        return Response(
+            response='\n'.join('\t'.join(f) for f in fields),
+            status=200,
+            mimetype="text/plain",    # TODO make parameter?
+        )
+
+    template_args = [
+            { 'term': term,
+              'measure':measure_name,
+              'values': [[hm, m(term,hm) ] for hm in stats[term] if hm is not None]  } 
+            for term in terms
+    ]
+
+
+    response = app.response_class(
+            response=json.dumps(template_args),
+            status=200,
+            mimetype='application/json'
+            )
+    return response
+
 
 def getarg(arg, default=None):
     return request.args.get(arg, default)
@@ -181,6 +237,11 @@ def getarg(arg, default=None):
 def get_query_terms():
     from config import QUERY_PARAMETER as q
     return [ t for t in request.args.getlist(q) if t and not t.isspace() ]
+
+def get_doc_pmids():
+    from config import PMIDS_PARAMETER as pmids
+    args = request.args.get(pmids, default='')
+    return args.split(',')
 
 def get_hallmark_terms():
     from config import HALLMARK_PARAMETER as h

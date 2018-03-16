@@ -1,16 +1,18 @@
 {% extends "base.html" %}
 {% block title %}Cancer Hallmarks Analytics Tool{% endblock %}
 {% block content %}
+{% if 0 %}
     <h1>Cancer Hallmarks Analytics Tool</h1>
 
 {% include "queryform.html" %}
+{% endif %}
 
-    <div id="about-chat">
-      The Cancer Hallmarks Analytics Tool created in collaboration between
-      the <a href="http://ltl.mml.cam.ac.uk/">Language Technology Lab
-	at University of Cambridge</a> and
-      the <a href="http://ki.se/en/imm/">Institute of Environmental Medicine
-	at Karolinska Institutet</a>.
-    </div>
+{% endblock %}
 
+
+
+{% block endjs %}
+<script>
+  window.renderReact = true
+</script>
 {% endblock %}

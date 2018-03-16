@@ -10,6 +10,10 @@ DUMMY_DBS = False
 # Port to listen on
 PORT = 80    # 5001
 
+
+# Parameter idenfitying the pmids string
+PMIDS_PARAMETER = 'pmids'
+
 # Parameter idenfitying the query string
 QUERY_PARAMETER = 'q'
 
