@@ -47,6 +47,26 @@ class DataController:
                 hmCounts[hm] = self.interface.getIntersectionCount(query, hm, "text", hallmarksField)
         return [queryReturnCount,hmCounts]
 
+    def getHallmarksForPMIDs(self, pmids):
+        pmids = [id+"-*" for id in pmids]
+        query = " OR ".join(pmids)
+        print(query)
+        #query="26500746-* OR 25995984-*"
+        queryReturnCount = self.interface.sentenceCountForQuery(query,field="id")
+        print(queryReturnCount)
+        #result = self.interface.getHallmarksForPMIDs(PMIDS)
+        hallmarksField = "hallmarks"
+        hmCounts = {}
+        queryReturnCount = self.interface.sentenceCountForQuery(query, field="id")
+        for hm in self.hallmarkCounts.keys():
+            if queryReturnCount == 0:
+                hmCounts[hm] = 0
+            else:
+                hmCounts[hm] = self.interface.getIntersectionCount(query, hm, "id", hallmarksField)
+        return [queryReturnCount, hmCounts]
+
+
+
     def search(self,query, maxReturnLimit,count=100, offset=0):
         query = QueryFormatter.formatQuery(query)
         result = self.interface.search(query, "text", maxReturnLimit)
@@ -57,6 +77,12 @@ class DataController:
         hallmarksField = "hallmarks"
         result = self.interface.searchGivenHallmarks(query, hallmarks, hallmarksField, count, offset)
         return result
+
+    # def searchPMIDs(self,pmids, count=100,offset=0):
+    #     result = self.interface.searchGivenHallmarks(query, hallmarks, hallmarksField, count, offset)
+    #     return result
+
+
 
     def close(self):
 	    self.interface.close()
@@ -107,9 +133,14 @@ def test():
     "retruned search for [x] hits:%d" % len(res)
     for r in res:
         print(str(r))
-    
-    #for r in res:
-	#print r["id"] + ": " + str(r["hallmarks"])
+
+    test_PMIDS = ["26500746", "25995984","25441643"]
+
+    [numSent, res] = controller.getHallmarksForPMIDs(test_PMIDS)
+    print "hallmarks distribution for test PMIDs '%s' has %d matching sentences " % (str(test_PMIDS), numSent)
+    print str(res)
+    for h in hm.keys():
+        print "%s:%d" % (h, res[h])
 
     controller.close()
 

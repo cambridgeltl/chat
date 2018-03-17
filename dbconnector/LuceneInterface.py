@@ -71,6 +71,16 @@ class LuceneInterface:
         self.searcher.search(qp, collector)
         return collector.getTotalHits()
 
+    # def sentenceCountForPMIDs(self, PMIDList):
+    #
+    #     #qp = QueryParser(Version.LUCENE_CURRENT, field, self.analyzer).parse(query)
+    #
+    #     q = TermQuery(Term(field, "hello world"))
+    #
+    #     collector = TotalHitCountCollector()
+    #     self.searcher.search(qp, collector)
+    #     return collector.getTotalHits()
+
     #def getQueryCount(self, query, field='text'):
         #qp = QueryParser(Version.LUCENE_CURRENT, field, self.analyzer).parse(query)
         #collector = TotalHitCountCollector()
