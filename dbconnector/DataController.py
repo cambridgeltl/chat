@@ -83,7 +83,7 @@ class DataController:
         query = " OR ".join([id + "-*" for id in pmids])
         result = self.interface.search(query, "id", count=count, offset=offset)
         orderedResult=[]
-        for pmid in sorted(pmids): # sorts the list by PMID, then by sentenceID
+        for pmid in pmids: # sorts the list by PMID, then by sentenceID
             sentencesForPMID =  [r for r in result if r["id"].startswith(pmid)]
             orderedResult.extend(sorted(sentencesForPMID, key= lambda r: int(r["id"].split("-")[1])))
         #result = self.interface.searchGivenHallmarks(query, hallmarks, hallmarksField, count, offset)
