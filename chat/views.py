@@ -146,12 +146,12 @@ def search():
     
     terms, hallmarks = get_query_terms(), get_hallmark_terms()
     results = []
-    if len(pmids) == 0:
-	results = db_controller.searchTextAndHallmarks(terms[0], hallmarks, 100)
-	#results = db_controller.searchTextAndHallmarks(terms[0], hallmarks, count=100,offset=0)
-    else:
-	#results = db_controller.searchPMIDs(pmids, count=100,offset=0)
-	pass
+    #results = db_controller.searchTextAndHallmarks(terms[0], hallmarks, 100)
+    if len(terms) > 0:
+	results = db_controller.searchTextAndHallmarks(terms[0], hallmarks, 100,0)
+    elif len(pmids) > 0:
+	results = db_controller.searchPMIDs(pmids, 10000,0)
+    #pass
 
     # Add PMID based on sentence ID. By convention, sentence IDs are
     # of the form <PMID>-<SENTIDX>.
@@ -184,13 +184,19 @@ def chart_data():
     # TODO: eliminate duplication with generate_charts()
     asjson = getarg('asjson',False)
     terms = get_query_terms()
-    if not terms:
-        return 'No query terms'
+    pmids = get_doc_pmids()
+
+    if not terms and not pmids:
+        return 'No query terms or pmids'
+
     measure = getarg('measure')
     hallmarks = getarg('hallmarks', 'top')
     hallmark_filter = top_hallmark_codes if hallmarks == 'top' else None
 
-    stats = hallmark_cooccurrences(terms, hallmark_filter)
+
+    stats = hallmark_cooccurrences(terms, hallmark_filter) if terms else \
+            hallmark_cooccurrences_by_pmids(pmids, hallmark_filter)
+
     m = select_measure(stats, measure)
     measure_name = selected_measure(stats, measure)
 
@@ -215,10 +221,14 @@ def chart_data():
             mimetype="text/plain",    # TODO make parameter?
         )
 
+
+
     template_args = [
             { 'term': term,
+              'hallmarks': hallmarks,
               'measure':measure_name,
-              'values': [[hm, m(term,hm) ] for hm in stats[term] if hm is not None]  } 
+              'values': {hm : max(0,m(term,hm))  for hm in stats[term] if hm is not None},
+              'counts': { k: v for k, v in stats.getcounts().items() if k == term }[term]  }
             for term in terms
     ]
 
@@ -241,7 +251,9 @@ def get_query_terms():
 def get_doc_pmids():
     from config import PMIDS_PARAMETER as pmids
     args = request.args.get(pmids, default='')
-    return args.split(',')
+    pmids = args.split(',')
+    print pmids
+    return pmids
 
 def get_hallmark_terms():
     from config import HALLMARK_PARAMETER as h
@@ -281,7 +293,7 @@ def filter_cooccurrence_data(data, hallmark_filter):
             filtered[term][hm] = data[term][hm]
     return filtered
 
-def hallmark_cooccurrences(terms, hallmark_filter=None):
+def hallmark_cooccurrences(terms,pmids, hallmark_filter=None):
     data = OrderedDict()
     # Initialize all hallmark counts to zero. This is required because
     # the API omits keys with zero occurrences from its dict.
@@ -289,6 +301,7 @@ def hallmark_cooccurrences(terms, hallmark_filter=None):
         data[term] = OrderedDict()
         for code, hm in hallmark_codes.items():
             data[term][hm] = 0
+
     # Get totals for hallmarks, store as (None, hm)
     data[None] = {}
     hallmark_total = db_controller.getHallmarksCount()
@@ -301,12 +314,44 @@ def hallmark_cooccurrences(terms, hallmark_filter=None):
         for code, count in hallmark_count.items():
             hm = hallmark_codes[code]
             data[term][hm] = count
+
     total = db_controller.getTotalNumberOfSentences()
     data[None][None] = total
+
     if hallmark_filter is not None:
         data = filter_cooccurrence_data(data, hallmark_filter.values())
+
     debug('cooccurrence data: {}'.format(data))
     return CountStats(data)
+
+def hallmark_cooccurrences_by_pmids(pmids, hallmark_filter=None):
+
+    key = ','.join(pmids)
+
+    data = OrderedDict()
+    data[key] = OrderedDict()
+    for code, hm in hallmark_codes.items():
+	data[key][hm] = 0
+    data[None] = {}
+    hallmark_total = db_controller.getHallmarksCount()
+    for code, count in sorted(hallmark_total.items()):
+        data[None][hallmark_codes[code]] = count
+
+    pmids_total, hallmark_count = db_controller.getHallmarksForPMIDs(pmids)
+    data[key][None] = pmids_total
+    for code, count in hallmark_count.items():
+	hm = hallmark_codes[code]
+	data[key][hm] = count
+
+    total = db_controller.getTotalNumberOfSentences()
+    data[None][None] = total
+
+    if hallmark_filter is not None:
+        data = filter_cooccurrence_data(data, hallmark_filter.values())
+
+    debug('pmids cooccurrence data: {}'.format(data))
+    return CountStats(data)
+
 
 def fill_template_arguments(args):
     """Add global arguments to template to given dictionary."""
