@@ -71,6 +71,16 @@ class LuceneInterface:
         self.searcher.search(qp, collector)
         return collector.getTotalHits()
 
+    # def sentenceCountForPMIDs(self, PMIDList):
+    #
+    #     #qp = QueryParser(Version.LUCENE_CURRENT, field, self.analyzer).parse(query)
+    #
+    #     q = TermQuery(Term(field, "hello world"))
+    #
+    #     collector = TotalHitCountCollector()
+    #     self.searcher.search(qp, collector)
+    #     return collector.getTotalHits()
+
     #def getQueryCount(self, query, field='text'):
         #qp = QueryParser(Version.LUCENE_CURRENT, field, self.analyzer).parse(query)
         #collector = TotalHitCountCollector()
@@ -84,11 +94,11 @@ class LuceneInterface:
         return collector.getTotalHits()
 
     # Return a list of records, where each record is a dictionary; the keys are the the field names in lucene.
-    def search(self, query, field, maxReturnLimit):
+    def search(self, query, field, count=100, offset=0):
         qp = QueryParser(Version.LUCENE_CURRENT, field, WhitespaceAnalyzer(Version.LUCENE_CURRENT)).parse(query)
-        hits = self.searcher.search(qp, maxReturnLimit)
+        hits = self.searcher.search(qp, offset+count)
         result = []
-        for hit in hits.scoreDocs:
+        for hit in hits.scoreDocs[offset:]:
             record = dict()
             doc = self.searcher.doc(hit.doc)
             record["id"] = doc.get("id")
@@ -99,7 +109,7 @@ class LuceneInterface:
             result.append(record)
         return result
 
-    def searchGivenHallmarks(self, query, hallmarksList, hallmarksField, maxReturnLimit):
+    def searchGivenHallmarks(self, query, hallmarksList, hallmarksField, count=100, offset=0):
         qList = [query]
         qList.extend(hallmarksList)
 	#print(qList)
@@ -111,9 +121,9 @@ class LuceneInterface:
         #print(flagList)
         qp = MultiFieldQueryParser.parse(Version.LUCENE_CURRENT, qList, fList, flagList, self.analyzer)
         #print (qp)
-        hits = self.searcher.search(qp, maxReturnLimit)
+        hits = self.searcher.search(qp, offset+count)
         result = []
-        for hit in hits.scoreDocs:
+        for hit in hits.scoreDocs[offset:]:
             record = dict()
             doc = self.searcher.doc(hit.doc)
             record["id"] = doc.get("id")
