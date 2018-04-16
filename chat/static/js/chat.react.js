@@ -48,12 +48,10 @@ function setMetadata(metadata) {
 
 }
 
-function addData(id,data) {
-    var payload = []
-    payload[id] = data
+function addData(id,data,ispaging) {
     return {
         type: "ADD_DATA",
-        payload
+        payload: {data,id, ispaging   }
     }
 }
 
@@ -66,10 +64,10 @@ function removeData(id) {
 }
 
 
-function setActiveData(active_dataset) {
+function setActiveData(active_dataset, ispaging) {
     return {
         type: "SET_ACTIVEDATA",
-        payload: active_dataset
+        payload: {data: active_dataset, ispaging} 
     }
 }
 
@@ -103,7 +101,12 @@ function clearDocClipboard() {
     }
 }
 
-
+function setOffset(id,offset) {
+    return {
+        type: "SET_OFFSET",
+        payload: {id, offset}	
+    }
+}
 
 
 
@@ -139,15 +142,61 @@ function dataR(state={ active_dataset:{}, datasets:{}, metadata:{}, docclipboard
             return _.merge({},copyState, action.payload)
         }
         case "SET_ACTIVEDATA": {
-            copyState.active_dataset =  _.merge({},copyState.active_dataset, action.payload)
+	    //if is paging, add to exisitng results
+            if (action.payload.data.results && action.payload.ispaging){
+		var existingresults = copyState.active_dataset.results ? copyState.active_dataset.results : []
+		action.payload.data.results = _.concat(existingresults, action.payload.data.results)
+	    }
+	    //if not paging clear the existing results
+	    if (!action.payload.ispaging && action.payload.data.results && copyState.active_dataset.results) {
+		delete copyState.active_dataset['results']
+	    }
+	    copyState.active_dataset =  _.merge({},copyState.active_dataset, action.payload.data)
+	    if (action.payload.data.hasOwnProperty('hm')) { 
+		copyState.active_dataset.hm = action.payload.data.hm
+	    }
+	    if (copyState.active_dataset.results){ 
+		copyState.active_dataset.offset = copyState.active_dataset.results.length
+	    }
+	    if (action.payload.data.term === null ){ delete copyState.active_dataset['term'] }
+	    if (action.payload.data.pmids === null ){ delete copyState.active_dataset['pmids'] }
 	    return copyState
         }
         case "ADD_DATA": {
-            delete copyState.datasets[_.keys(action.payload.id)[0]]
-	    copyState.datasets = _.merge({},copyState.datasets,action.payload) 
+            //delete copyState.datasets[_.keys(action.payload.data)[0]]
+            if (action.payload.data.results && action.payload.ispaging){
+		var existingresults = copyState.datasets[action.payload.id].results ? 
+			              copyState.datasets[action.payload.id].results : []
+		action.payload.data.results = _.concat(existingresults, action.payload.data.results)
+	    }
+
+	    copyState.datasets[action.payload.id] = _.merge({},
+		copyState.datasets[action.payload.id] ?	copyState.datasets[action.payload.id] : {},
+		action.payload.data) 
+
+	    if (action.payload.data.hasOwnProperty('hm')) { 
+		copyState.datasets[action.payload.id].hm = action.payload.data.hm
+	    }
+
+
+	    if (copyState.datasets[action.payload.id].results){ 
+		
+		copyState.datasets[action.payload.id].offset = 
+		    copyState.datasets[action.payload.id].results.length
+
+	    }
             return copyState
         }
-        
+	case "SET_OFFSET":{
+	    if (action.payload.id == null) {
+		copyState.active_dataset.offset = 
+		    Math.min( Math.max( action.payload.offset , 20), copyState.active_dataset.results.length)
+	    } else {
+		copyState.datasets[action.payload.id].offset = 
+		    Math.min( Math.max( action.payload.offset, 20), copyState.datasets[action.payload.id].results.length  )
+	    }
+            return copyState
+	}
 	case "SET_PMCDATA": {
 	    var dataset = action.payload.id === null ? 
 			  copyState.active_dataset : 
@@ -263,6 +312,7 @@ class MyChart extends React.Component {
 
     // This binding is necessary to make `this` work in the callback
     this.handleClick = this.handleClick.bind(this);
+    //this.handleChartClick = this.handleChartClick.bind(this);
     this.plotGraph = this.plotGraph.bind(this);
     this.renderLegend = this.renderLegend.bind(this);
   }
@@ -271,6 +321,59 @@ class MyChart extends React.Component {
     this.plotGraph()
   }
 
+  handleChartClick(that) {
+    console.log('setting handleChartClick')
+    var hallmark_codes =
+          that.props.metadata[that.props.hallmarks+"_hallmark_codes"]
+    var hallmark_codes_arr = _.sortBy( _.keys(hallmark_codes) )
+    var hallmark_names_arr = _.map(hallmark_codes_arr, (o) => hallmark_codes[o])
+    var data = _.map(hallmark_names_arr, (o) => that.props.data[o])
+    
+    return function(event) {
+	console.log('chart is clicked')	
+
+        var chart = this;    // called in context of chart
+	var elements = chart.getElementAtEvent(event);
+	
+        if (elements && elements.length > 0 && elements[0]){
+	    var element = elements[0];
+	    var hallmark_code = hallmark_codes_arr[element._index];
+	    var hallmark_name = hallmark_names_arr[element._index];
+	    
+	    that.props.onHallmarkClick(hallmark_code, hallmark_name)
+	}
+    };
+
+    /*
+	Chart.defaults.global.onClick = function(event) {
+	    var chart = this;    // called in context of chart
+	    var labels = chart.config.data.labels;
+	    var datasets = chart.config.data.datasets;
+	    var elements = chart.getElementAtEvent(event);
+	    var element = elements[0];
+	    var label = labels[element._index];
+	    var dataset = datasets[element._datasetIndex];
+	    // query is a custom attribute of the dataset filled in chart.py
+	    // to provide access to the user query that generated the chart.
+	    var query = dataset.query;
+	    // codes is a custom attribute of the dataset filled in chart.py
+	    // to map data indices to hallmark codes.
+	    var hallmark_codes = dataset.codes;
+	    var hallmark_code = hallmark_codes[element._index];
+	    // assume that the label of the element clicked on contains the
+	    // human-readable code of one of the hallmarks and map to code.
+	    // in comparison mode, statistical significance is marked as part
+	    // of the label (e.g. "apoptosis (p<0.01)") and must first be
+	    // removed to get the actual hallmark label.
+	    var hallmark = label.replace(/ *\(.*\) *$/, '')
+	    // TODO: escape special characters in query, grab query and hallmark
+	    // arguments from config instead of hardcoding "q" and "hm".
+	    window.location = '/search?q='+query+'&hm='+hallmark_code;
+	};
+    */
+
+
+  }
 
   componentDidUpdate(prevProps, prevState) {
     if (!_.isEqual(prevProps, this.props)){
@@ -301,7 +404,7 @@ class MyChart extends React.Component {
 		  "data": data,
                   "hoverBackgroundColor": 
                   _.map(this.props.metadata[this.props.hallmarks+"_hallmark_colors"],(o)=>LightenDarkenColor(o,20)),
-		  "query": this.props.term
+		  "query": this.props.title
 	      }
 	  ],
 	  "labels": hallmark_names_arr
@@ -318,7 +421,7 @@ class MyChart extends React.Component {
 	  "responsive": true,
 	  "title": {
 	      "display": true,
-	      "text": this.props.term
+	      "text": this.props.title
 	  }
       };
 
@@ -334,12 +437,17 @@ class MyChart extends React.Component {
       };
       var ctx1 = document.getElementById("chart-1").getContext("2d");
       ctx1.canvas.height = 300;
+
       options.hover = {
 	  onHover: function(e) {
 	      var cnv = document.getElementById("chart-1");
 	      cnv.style.cursor = e[0] ? "pointer" : "default";
 	  }
       };
+
+      options.onClick =  this.handleChartClick(this)      
+      
+
       window.chart1 = new Chart(ctx1, {
 	  type: "doughnut",
 	  data: chartData1,
@@ -349,6 +457,7 @@ class MyChart extends React.Component {
       console.log('Chart 1')
       console.log(window.chart1)
       
+      //this.handleChartClick()
   }
 	
   handleClick() {
@@ -472,6 +581,137 @@ const ReduxedSearchItem = connect(
 )(SearchItem)
 
 
+class FileDragDropPanel extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    this.handleDragOver = this.handleDragOver.bind(this);
+    this.handleFileSelect = this.handleFileSelect.bind(this);
+
+    this.myRef = React.createRef();
+  }
+
+  handleDragOver(evt) {
+      evt.stopPropagation();
+      evt.preventDefault();
+      evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+  }
+
+  handleFileSelect(evt) {
+      var that = this
+      evt.stopPropagation();
+      evt.preventDefault();
+
+      var files = evt.dataTransfer.files; // FileList object.
+      console.log('files')
+      console.log(files)
+
+      if (files.length > 0 ){
+	  var reader = new FileReader();
+	  // Read in the image file as a data URL.
+	  reader.onload = function(e) {
+	      var text = reader.result;
+	      console.log(text)
+              that.props.handleNewData( text.split(/\n/) )
+	  }
+	  reader.readAsText(files[0]);
+      }
+  } 
+
+  componentDidMount() {
+      this.myRef.current.addEventListener('dragover', this.handleDragOver, false);
+      this.myRef.current.addEventListener('drop', this.handleFileSelect, false);
+  }
+  
+  render() {
+
+    return (
+	<div ref={this.myRef} style={{height: '60px', textAlign: 'center', border: '1px dashed #ced4da', 
+		     marginBottom: '30px', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+	    {window.File && window.FileReader && window.FileList && window.Blob ?
+	    <h6>Or drop PMID list here <i className="far fa-file"></i></h6> :
+	    <h6>Your browser does not support file drag and drop</h6> }
+        </div>
+    )
+  
+  }
+
+
+}
+
+
+
+
+
+
+class ComparePanel extends React.Component {
+
+    constructor(props) {
+	super(props);
+	this.handleChange = this.handleChange.bind(this);
+	this.state = {dataset1: null, dataset2: null  }
+    }
+
+    handleChange(e,dataset) {
+	e.preventDefault();
+	var newState = this.state
+        newState[dataset] = e.target.value
+        this.setState(newState)
+    }
+
+    calculatePValueMatrix() {
+	var datasets = this.props.datasets
+	var activedata = this.props.activedata
+    }
+
+    render() {
+	return (
+	    <div className="row">
+		<div className="col">
+
+		    <div>
+			<form>
+			  <div className="form-row">
+			    <div className="form-group col-6">
+			      <label htmlFor="inputState">Dataset 1</label>
+			      <select id="inputCompare1" className="form-control" value={_.keys(this.props.datasets)[0]} 
+				      onChange={(e)=>this.handleChange(e, 'dataset1')}
+			      >
+				{ _.map(_.keys(this.props.datasets),
+					function(o,ind){ return (<option  key={ind}>{o}</option>) })}
+			      </select>
+			    </div>
+			    <div className="form-group col-6">
+			      <label htmlFor="inputState">Dataset 2</label>
+			      <select id="inputCompare2" className="form-control" value={_.keys(this.props.datasets)[0]}
+				      onChange={(e)=>this.handleChange(e,'dataset2')}
+			      >
+				{ _.map(_.keys(this.props.datasets),
+					function(o,ind){ return (<option  key={ind}>{o}</option>) })}
+			      </select>
+			    </div>
+			  </div>
+			</form>
+		    </div>
+
+		</div>
+	    </div>
+	)
+    }
+}
+const ReduxedComparePanel = connect(
+    (state) => {return { metadata: state.dataR.metadata, 
+			 activedata:state.dataR.active_dataset, 
+			 datasets: state.dataR.datasets }; },
+    (dispatch) => {return {};    
+    }
+)(ComparePanel)
+
+
+
+
+
 
 
 class QueryPanel extends React.Component {
@@ -486,105 +726,98 @@ class QueryPanel extends React.Component {
 		  chart_type: metadata.chart_type, 
 		  hallmarks:metadata.hallmarks, 
 		  term: ""
-		  }
+		  },
+		  textFile: null
 	       	};
 
     // This binding is necessary to make `this` work in the callback
+    this.handleNextPage = this.handleNextPage.bind(this);
+    this.handlePrevPage = this.handlePrevPage.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.fillParams = this.fillParams.bind(this);
-    this.runQuery = this.runQuery.bind(this);
+    this.handleSelectHallmark = this.handleSelectHallmark.bind(this);
+    this.handleNewPMIDQry = this.handleNewPMIDQry.bind(this);
+    this.downloadPMIDs = this.downloadPMIDs.bind(this)
+    this.generateQueryData = this.generateQueryData.bind(this)
   }
 
-  fillParams(data) {
-    var params = _.pick(data,['term','hm','hallmarks','measure','offset'])
-    if (data.hasOwnProperty('pmids')) { 
-      params['pmids']=data.pmids.join(','); 
-      delete params['term']
-    }
-    if (params.hasOwnProperty('term')){
-      params['q'] = params['term']
-      delete params['term']
-    }
-    params['asjson'] = 1
-    return params
-  }
-
-  runQuery(props) {
-
-	var setactivedata_ = props.setactivedata_
-	var setpmcdataid_ = props.setpmcdataid_
-	var addData_ = props.addData_
-
-	var dataset = props.dataset
-	var params = dataset == null ? this.fillParams(this.state.formVals) : this.fillParams(props.datasets[dataset])
-		    // { q:formVals.term, measure:formVals.measure, hallmarks: formVals.hallmarks, asjson: 1   }
-
-	var setDataRespFn = dataset == null ? setactivedata_ : (d) => addData_(dataset,d)
-	
-	$.get( "/search", params , function( data ) { 
-	    //setactivedata_(data)
-	    setDataRespFn(data)
-
-	    if (!data.hasOwnProperty('results') || data.results.length == 0){return }
-
-	    var pmids = _.map(data.results, (o) => o.pmid).join(',')	
-	    $.getJSON("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id="+pmids+"&retmode=json&tool=crab2&email=tss42@cam.ac.uk", function(data){setpmcdataid_(dataset, data.result)}); 
-	}, "json");
-	
-	$.get( "/chartdata", params, function( data ) { 
-	    setDataRespFn(data[0])  //setactivedata_(data[0])
-	}, "json");
-
+  generateQueryData(props,state){
+    var data = props.dataset == null ? 
+		 _.merge({},state.formVals,_.pick(props.activedata, ['hm','pmids','offset'] )) : 
+		 this.props.datasets[dataset],ispaging
+    return data
   }
 
   componentDidUpdate(prevProps, prevState) {
+    var newdata = this.props.dataset == null ? this.props.activedata : this.props.datasets[this.props.dataset]
+    var olddata = prevProps.dataset == null ? prevProps.activedata : prevProps.datasets[prevProps.dataset]
+
+    console.log('in componentDidUpdate')
+    console.log(newdata.hm)
+    console.log(olddata.hm)
+
     if (this.props.dataset != prevProps.dataset){
 	var dataset = this.props.dataset
 	var data = dataset == null ? this.props.activedata : this.props.datasets[dataset] 
 	if (!data.results && dataset != null){
-	    this.runQuery(this.props)
+	    //this.props.runQuery(this.props)
+	    this.props.runQuery(this.props.dataset,this.generateQueryData(this.props,this.state))
 	}
-    }
+    } else if (!_.isEqual(newdata.hm , olddata.hm)) {
+	console.log('should be running query')
+	//this.props.runQuery(this.props)
+	this.props.runQuery(this.props.dataset,this.generateQueryData(this.props,this.state))
+    } else if (this.props.dataset == null && prevProps.dataset == null &&
+	       !_.isEqual(this.props.activedata.pmids, prevProps.activedata.pmids)) {
+        console.log('pmids have changed!!!')
+        console.log(this.props)
+	//this.props.runQuery(this.props)
+	this.props.runQuery(this.props.dataset,this.generateQueryData(this.props,this.state))
+    }	
   }
 
   componentDidMount() {
     var dataset = this.props.dataset
     var data = dataset == null ? this.props.activedata : this.props.datasets[dataset] 
     if (!data.results && dataset != null){
-	this.runQuery(this.props)
+	//this.runQuery(this.props)
+	this.props.runQuery(this.props.dataset, this.generateQueryData(this.props,this.state))
     }
   }
 	
+  handleNextPage(e) {
+    e.preventDefault();
+    var dataset = this.props.dataset
+    var data = dataset == null ? this.props.activedata : this.props.datasets[dataset] 
+    if (data.offset + 20 <= data.results.length){
+	this.props.setOffset_(dataset,data.offset + 20)
+    } else {
+	//this.runQuery(this.props,true)
+	this.props.runQuery(this.props.dataset,this.generateQueryData(this.props,this.state), true)
+    }
+  }
+
+  handlePrevPage(e) {
+    e.preventDefault();
+    var dataset = this.props.dataset
+    var data = dataset == null ? this.props.activedata : this.props.datasets[dataset] 
+    this.props.setOffset_(dataset,data.offset - 20)
+  }
+
   handleClick(e) {
     e.preventDefault();
     var formVals = this.state.formVals
     if (formVals.term.length > 0 ) {
-	this.props.clearcboard_()
-	this.runQuery(this.props)
 
-	/*
-	var setactivedata_ = this.props.setactivedata_
-	var setpmcdataid_ = this.props.setpmcdataid_
-	var params = { q:formVals.term, measure:formVals.measure, hallmarks: formVals.hallmarks, asjson: 1   }
-	$.get( "/search", params , function( data ) { 
-	
-	    setactivedata_(data)
-	    if (!data.hasOwnProperty('results') || data.results.length == 0){return }
-
-	    var pmids = _.map(data.results, (o) => o.pmid).join(',')	
-
-	    $.getJSON("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id="+pmids+"&retmode=json&tool=crab2&email=tss42@cam.ac.uk", 
-	    function(data){
-		//hello
-		setpmcdataid_(null, data.result)	
-	    }); 
-
-
-	}, "json");
-	$.get( "/chartdata", params, function( data ) { setactivedata_(data[0])}, "json");
-	*/
-
+	console.log('Query clicked')
+	//this.props.clearcboard_()
+	if (this.props.activedata.hasOwnProperty('pmids')) {
+	    console.log('clearing active data pmids')
+	    this.props.setactivedata_({'pmids':null},false)
+	} else {
+	    //this.runQuery(this.props)
+	    this.props.runQuery(this.props.dataset,this.generateQueryData(this.props,this.state))
+	}
     }
   }
 
@@ -595,46 +828,40 @@ class QueryPanel extends React.Component {
     this.setState(prevState => (  _.merge({},prevState,{ formVals:toMerge} )  ));
   }
 
+  
+  handleSelectHallmark(hmcode) {
+    console.log('handleSelectHallmark fired!')
+    console.log(hmcode)
+    var dataset = this.props.dataset
+    var setDataRespFn = dataset == null ? this.props.setactivedata_ : 
+					  (d,ispaging_) => this.props.addData_(dataset,d,ispaging_)
+    setDataRespFn({'hm':hmcode != null ? [hmcode] : []},false)
+  }
 
+  handleNewPMIDQry(pmids) {
+    console.log('query pmids are')
+    console.log(pmids)
+    this.props.setactivedata_({'pmids':_.filter(pmids,(o) => o.length > 0 ), term: null},false)
+  }
 
-  handleChartClick() {
-
-    Chart.defaults.global.onClick = function(event) {
-	var chart = this;    // called in context of chart
-	var labels = chart.config.data.labels;
-	var datasets = chart.config.data.datasets;
-	var elements = chart.getElementAtEvent(event);
-	var element = elements[0];
-	var label = labels[element._index];
-	var dataset = datasets[element._datasetIndex];
-	// query is a custom attribute of the dataset filled in chart.py
-	// to provide access to the user query that generated the chart.
-	var query = dataset.query;
-	// codes is a custom attribute of the dataset filled in chart.py
-	// to map data indices to hallmark codes.
-	var hallmark_codes = dataset.codes;
-	var hallmark_code = hallmark_codes[element._index];
-	// assume that the label of the element clicked on contains the
-	// human-readable code of one of the hallmarks and map to code.
-	// in comparison mode, statistical significance is marked as part
-	// of the label (e.g. "apoptosis (p<0.01)") and must first be
-	// removed to get the actual hallmark label.
-	var hallmark = label.replace(/ *\(.*\) *$/, '')
-	// TODO: escape special characters in query, grab query and hallmark
-	// arguments from config instead of hardcoding "q" and "hm".
-	window.location = '/search?q='+query+'&hm='+hallmark_code;
-    };
-
-
+  downloadPMIDs(pmids) {
+    var data = new Blob([pmids.join('\n')], {type: 'text/plain'});
+    // If we are replacing a previously generated file we need to
+    // manually revoke the object URL to avoid memory leaks.
+    //if (this.state.textFile !== null) {
+    //  window.URL.revokeObjectURL(this.state.textFile);
+    //}
+    var textFile = window.URL.createObjectURL(data);
+    return textFile;
   }
 
 
-
-
   render() {
-
+    var that = this
     var dataset = this.props.dataset
     var data = dataset == null ? this.props.activedata : this.props.datasets[dataset] 
+    
+
 
     if (_.isEmpty(data) && dataset == null){
 	return (
@@ -642,6 +869,7 @@ class QueryPanel extends React.Component {
 		<div className="col-md-8 offset-md-2">
 		    <ReduxedSearchBox handleClick={this.handleClick} handleChange={this.handleChange} 
 				      formVals={this.state.formVals}/>
+		    <FileDragDropPanel handleNewData={this.handleNewPMIDQry} />
 		</div>
 	    </div>
 	);
@@ -657,6 +885,10 @@ class QueryPanel extends React.Component {
 	)
     }
 
+    var hallmark_codes = this.props.metadata["full_hallmark_codes"]
+    console.log('hallmark_codes')
+    console.log(hallmark_codes)
+    console.log(data.hm)
 
     return (
 	<div className="row">
@@ -665,9 +897,36 @@ class QueryPanel extends React.Component {
                     
 		    { dataset == null ?  <ReduxedSearchBox handleClick={this.handleClick} handleChange={this.handleChange} 
                         formVals={this.state.formVals}/> : null }
+		    { dataset == null ?  <FileDragDropPanel handleNewData={this.handleNewPMIDQry} /> : null }
                     <div className="d-none d-md-block" style={{marginTop: '30px'}}>
+			{ data.results  ?
+			   <div>
+			       <div style={{padding: '6px', backgroundColor: '#007bff', color: 'white'}}>
+			         {data.term ? data.term : 'Searching PubMed IDs'} 
+			         {data.pmids ? 
+                                     <a href="#" onClick={() => this.downloadPMIDs(data.pmids)}>
+				     <i className="fas fa-download"></i></a>  : null} 
+				 {data.hm && data.hm.length > 0 ? ' > '+ hallmark_codes[data.hm[0]] + ' ' : ' '}
+				 {data.hm && data.hm.length > 0 ?  
+				    <a  style={{color: 'white'}}
+					href="#" onClick={(e) => { e.preventDefault();that.handleSelectHallmark(null); } } >
+					<i className="far fa-times-circle"></i>
+				    </a>
+				    : null}
+			       </div>
+			       <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding:5}}>
+				<a href="#" onClick={(e) => this.handlePrevPage(e)}>&lt;Prev</a>
+				<p>
+				    {Math.max(data.offset-20+1,1) + ' to ' + data.offset + 
+				    (data.counts ? ' of  ' + data.counts[null] : ''  ) }
+				</p>
+				<a href="#" onClick={(e) => this.handleNextPage(e)}>Next&gt;</a>
+			       </div>
+			   </div>
+			  : null
+			}
                         {data.results ? 
-			 _.map(data.results,function(o,ind){ 
+			 _.map(_.slice(data.results, Math.max( data.offset - 20,0),data.offset),function(o,ind){ 
 			    return (<ReduxedSearchItem showAddRem={dataset == null} item={o}  key={ind} />) }):
 			 null}
                     </div>
@@ -676,14 +935,40 @@ class QueryPanel extends React.Component {
 	    <div className="col-md-5 order-md-1">
 		<div style={{marginTop: '30px', marginBottom: '30px'}}>
 		    {data.values ? 
-			<ReduxedMyChart data={data.values} term={data.term}
-				      hallmarks={data.hallmarks} /> : null }
+			<ReduxedMyChart onHallmarkClick={this.handleSelectHallmark}
+					data={data.values} term={data.term} 
+					title={data.term?data.term:data.pmids?data.pmids.join(','):'Chart'}
+				        hallmarks={data.hallmarks} /> : null }
 		</div>
 	    </div>
 	    <div className="d-md-none">
                 <div style={{marginTop: '30px', marginBottom: '30px'}}>
                     <div>
-                        { data.results ? _.map(data.results,function(o,ind){ 
+			{ data.results  ?
+			   <div>
+			       <div style={{padding: '6px', backgroundColor: '#007bff', color: 'white'}}>
+			         {data.term ? data.term : 'Searching PubMed IDs'} 
+			         {data.pmids ? 
+                                     <a href="#" onClick={() => this.downloadPMIDs(data.pmids)}>
+				     <i className="fas fa-download"></i></a>  : null} 
+				 {data.hm && data.hm.length > 0 ? ' > '+ hallmark_codes[data.hm[0]] + ' ' : ' '}
+				 {data.hm && data.hm.length > 0 ?  
+				    <a  style={{color: 'white'}}
+					href="#" onClick={(e) => { e.preventDefault();that.handleSelectHallmark(null); } } >
+					<i className="far fa-times-circle"></i>
+				    </a>
+				    : null}
+			       </div>
+			       <div style={{display: 'flex',flexDirection: 'row', justifyContent: 'space-between', padding: 5}}>
+				<a href="#" onClick={(e) => this.handlePrevPage(e)}>&lt;Prev</a>
+				<p>{Math.max(data.offset-20+1,1) + ' to ' + data.offset + 
+				    (data.counts ? ' of  ' + data.counts[null] : ''  ) }</p>
+				<a href="#" onClick={(e) => this.handleNextPage(e)}>Next&gt;</a>
+			       </div>
+			   </div>
+			  : null
+			}
+                        { data.results ? _.map(_.slice(data.results, Math.max( data.offset - 20,0),data.offset),function(o,ind){ 
 			    return (<ReduxedSearchItem showAddRem={dataset == null} item={o}  key={ind} />) }):null}
                     </div>
 		</div>
@@ -698,13 +983,22 @@ const ReduxedQueryPanel = connect(
 			 activedata:state.dataR.active_dataset, 
 			 datasets: state.dataR.datasets }; },
     (dispatch) => {return {
-	    setactivedata_ : (activedata) => { dispatch(setActiveData(activedata)) },
+	    setactivedata_ : (activedata,ispaging) => { dispatch(setActiveData(activedata,ispaging)) },
 	    setpmcdataid_  : (id, pmcresults)  => {  dispatch(setPMCData(id,pmcresults)) }, 
-	    addData_  : (id,data)  => {  dispatch(addData(id,data)) },
+	    addData_  : (id,data,ispaging)  => {  dispatch(addData(id,data,ispaging)) },
+	    setOffset_  : (id,offset)  => {  dispatch(setOffset(id,offset)) },
 	    clearcboard_  : ()  => {  dispatch(clearDocClipboard()) },
        	          };    
     }
 )(QueryPanel)
+
+
+
+
+
+
+
+
 
 
 class Chat extends React.Component {
@@ -715,6 +1009,8 @@ class Chat extends React.Component {
     this.handleSaveChange = this.handleSaveChange.bind(this);
     this.generateNewDatasetId = this.generateNewDatasetId.bind(this);
     this.handleActivePanelClick = this.handleActivePanelClick.bind(this);
+    this.fillParams = this.fillParams.bind(this);
+    this.runQuery = this.runQuery.bind(this);
     this.state = {activepanel: null , 
 		  queryDatasetName: this.generateNewDatasetId('Qry-'), 
 		  docsDatasetName: this.generateNewDatasetId('Doc-') }
@@ -728,6 +1024,71 @@ class Chat extends React.Component {
     return code
   }
 
+
+  fillParams(data, ispaging) {
+    var params = _.pick(data,['term','hm','hallmarks','measure','offset'])
+    if (data.hasOwnProperty('pmids')) { 
+      params['pmids']=_.filter(data.pmids,(o) => o.length > 0 ).join(','); 
+      delete params['term']
+    }
+    if (params.hasOwnProperty('term')){
+      params['q'] = params['term']
+      delete params['term']
+    }
+    params['asjson'] = 1
+    return ispaging ? params : _.omit(params, ['offset'])
+  }
+
+  runQuery(dataset,data,ispaging) {
+	var setactivedata_ = this.props.setactivedata_
+	var setpmcdataid_ = this.props.setpmcdataid_
+	var addData_ = this.props.addData_
+
+	//var dataset = props.dataset
+
+	/*
+	var params = dataset == null ? 
+			this.fillParams(_.merge({},this.state.formVals,
+			    _.pick(this.props.activedata, ['hm','pmids','offset'] )), ispaging) : 
+			this.fillParams(props.datasets[dataset],ispaging)
+		    // { q:formVals.term, measure:formVals.measure, hallmarks: formVals.hallmarks, asjson: 1   }
+	*/
+
+	var params = this.fillParams( data , ispaging )
+
+	var urlqrystr = ''
+	var hallmarks = params.hm
+        if (hallmarks && hallmarks.length > 0 ){
+	    delete params['hm']
+	    console.log(hallmarks)
+            urlqrystr = '?' + _.map(hallmarks, (o) => 'hm='+o.toString()   ).join('&')
+	}
+	if (dataset == null && params.term && params.pmids){
+	    delete params['term']
+	}
+	console.log('running query!')
+	var setDataRespFn = dataset == null ? setactivedata_ : (d,ispaging_) => addData_(dataset,d,ispaging_)
+	$.get( "/search"+urlqrystr, params , function( data ) { 
+	    //setactivedata_(data)
+	    delete data['hm']
+	    setDataRespFn(data ,ispaging)
+
+	    if (!data.hasOwnProperty('results') || data.results.length == 0){return }
+
+	    var pmids = _.map(data.results, (o) => o.pmid).join(',')	
+	    $.getJSON("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id="+pmids+"&retmode=json&tool=crab2&email=tss42@cam.ac.uk", function(data){setpmcdataid_(dataset, data.result)}); 
+	}, "json");
+	
+        if (!ispaging){
+	    $.get( "/chartdata", params, function( data ) { 
+		setDataRespFn(data[0],false)  //setactivedata_(data[0])
+	    }, "json");
+	}
+  }
+
+
+
+
   componentDidMount() {
     var setmetadata_ = this.props.setmetadata_
     if (!this.props.metadata.hasOwnProperty('measure')){
@@ -737,8 +1098,10 @@ class Chat extends React.Component {
     }
   }
 
-  handleSaveChange(e,key) {    
-    this.setState({key: e.target.value })
+  handleSaveChange(e,key) {
+    var outState = {}
+    outState[key] = e.target.value    
+    this.setState(outState)
   }
 
   handleSaveClick(e,type) {
@@ -748,6 +1111,11 @@ class Chat extends React.Component {
     if (type == 'query' && this.props.activedata.hasOwnProperty('term')  && 
 	this.props.activedata.hasOwnProperty('results') && this.props.activedata.hasOwnProperty('values') ) { 
 	this.props.addData_(this.state.queryDatasetName,_.pick(this.props.activedata,['term','hm','hallmarks','measure','offset']))
+	this.setState({queryDatasetName: this.generateNewDatasetId('Qry-') })
+    }
+    else if (type == 'query' && this.props.activedata.hasOwnProperty('pmids')  && 
+	this.props.activedata.hasOwnProperty('results') && this.props.activedata.hasOwnProperty('values') ) { 
+	this.props.addData_(this.state.queryDatasetName,_.pick(this.props.activedata,['pmids','hm','hallmarks','measure','offset']))
 	this.setState({queryDatasetName: this.generateNewDatasetId('Qry-') })
     }
     else if (type == 'docs' && this.props.docclipboard.length > 0  ) {
@@ -793,14 +1161,20 @@ class Chat extends React.Component {
 		: <p>No documents selected to save</p> }
 	      </div>
 	      <div className="modal-footer">
-		<input name="datasetname" 
-		       value={type == 'query' ? this.state.queryDatasetName : this.state.docsDatasetName} 
-		       onChange={(e) => this.handleSaveChange(e,type == 'query' ? 
-				this.state.queryDatasetName : this.state.docsDatasetName )} />
-		<button type="button" className="btn btn-primary" onClick={(e) => this.handleSaveClick(e,type)}>
-		    Save
-		</button>
-		<button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
+		<form className="form-inline">
+		    <div className="form-group">
+			<input name="datasetname" className="form-control" style={{margin: '3px'}} 
+			       value={type == 'query' ? this.state.queryDatasetName : this.state.docsDatasetName} 
+			       onChange={(e) => this.handleSaveChange(e,type == 'query' ? 
+					'queryDatasetName' : 'docsDatasetName' )} />
+			<button type="button" className="form-control btn btn-primary"  style={{margin: '3px'}} 
+			    onClick={(e) => this.handleSaveClick(e,type)}>
+			    Save
+			</button>
+			<button type="button"  style={{margin: '3px'}} 
+				className="form-control btn btn-secondary" data-dismiss="modal">Cancel</button>
+		    </div>
+		</form>
 	      </div>
 	    </div>
 	  </div>
@@ -812,7 +1186,7 @@ class Chat extends React.Component {
   render() {
     var activedata = this.props.activedata
     
-    var save_query_enabled = this.props.activedata.hasOwnProperty('term')  && 
+    var save_query_enabled = (this.props.activedata.hasOwnProperty('term') || this.props.activedata.hasOwnProperty('pmids'))  && 
 			     this.props.activedata.hasOwnProperty('results') && this.props.activedata.hasOwnProperty('values') 
 
 
@@ -839,9 +1213,18 @@ class Chat extends React.Component {
 				    <button onClick={(e) => this.handleActivePanelClick(e,null)} 
 					type="button" 
 					className={"btn btn-"+(this.state.activepanel == null ? "" : "outline-" )+"primary"}>
-					    Active
+					    Main
 				    </button>
 				</li>
+				{ Object.keys(this.props.datasets).length > 0 ?
+				<li className="list-inline-item">
+				    <button onClick={(e) => this.handleActivePanelClick(e,false)} 
+					type="button" 
+					className={"btn btn-outline-info"}>
+					    Compare
+				    </button>
+				</li>
+				: null }
 				{_.map(Object.keys(this.props.datasets), (o) => 
 				 (<li className="list-inline-item" key={o}>
 				    <button onClick={(e) => this.handleActivePanelClick(e,o)} 
@@ -873,7 +1256,10 @@ class Chat extends React.Component {
 			</div>
 		    </div>
 		</div> : null }
-		<ReduxedQueryPanel dataset={this.state.activepanel} />
+		{ this.state.activepanel !== false ?
+		    <ReduxedQueryPanel runQuery={this.runQuery} dataset={this.state.activepanel} /> :
+		    <ReduxedComparePanel /> 
+		}
 		{this.renderSaveModal('query')}
 		{this.renderSaveModal('docs')}
 	    </div>
@@ -889,9 +1275,14 @@ const ReduxedChat = connect(
     (dispatch) => {return { 
         setmetadata_ : (metadata) => { dispatch(setMetadata(metadata)) }, 
 	removefromcboard_  : (pmid)  => {  dispatch(removeDocFromClipboard(pmid)) },
-	addData_  : (id,data)  => {  dispatch(addData(id,data)) },
+ 
+	setactivedata_ : (activedata,ispaging) => { dispatch(setActiveData(activedata,ispaging)) },
+	setpmcdataid_  : (id, pmcresults)  => {  dispatch(setPMCData(id,pmcresults)) }, 
+	addData_  : (id,data,ispaging)  => {  dispatch(addData(id,data,ispaging)) },
+	setOffset_  : (id,offset)  => {  dispatch(setOffset(id,offset)) },
 	clearcboard_  : ()  => {  dispatch(clearDocClipboard()) },
-    };    
+
+   };    
     }
 )(Chat)
 
@@ -910,3 +1301,19 @@ ReactDOM.render(
       document.getElementById('root')
 );
 }
+
+
+
+
+
+
+
+
+//Remaining TODO
+//3. implement file drag and drop
+//3. export pmids as list
+//2. implement compare panel
+
+//5. fix paging for document select / document numbers
+//6. implement query save url by session
+

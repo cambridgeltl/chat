@@ -143,14 +143,20 @@ def pubmed_annotations(id_):
 def search():
 
     pmids = get_doc_pmids() 
-    
+     
     terms, hallmarks = get_query_terms(), get_hallmark_terms()
+    offset = getarg('offset', 0)
+    try:
+	offset = int(offset)
+    except:
+	offset = 0
+
     results = []
     #results = db_controller.searchTextAndHallmarks(terms[0], hallmarks, 100)
     if len(terms) > 0:
-	results = db_controller.searchTextAndHallmarks(terms[0], hallmarks, 100,0)
+	results = db_controller.searchTextAndHallmarks(terms[0], hallmarks, 20,offset)
     elif len(pmids) > 0:
-	results = db_controller.searchPMIDs(pmids, 10000,0)
+	results = db_controller.searchPMIDs(pmids, 10000,offset)
     #pass
 
     # Add PMID based on sentence ID. By convention, sentence IDs are
@@ -165,10 +171,14 @@ def search():
             # Document missing. TODO: better resolution?
             r['title'] = ''
     template_args = {
-        'term': terms[0],
         'hm': [ hallmark_codes.get(hm) for hm in hallmarks ],
         'results': results
     }
+    if len(terms) > 0:
+	template_args['term'] = terms[0]
+    elif len(pmids) > 0:
+	template_args['pmids'] = pmids
+
     response = app.response_class(
             response=json.dumps(template_args),
             status=200,
@@ -229,9 +239,12 @@ def chart_data():
               'measure':measure_name,
               'values': {hm : max(0,m(term,hm))  for hm in stats[term] if hm is not None},
               'counts': { k: v for k, v in stats.getcounts().items() if k == term }[term]  }
-            for term in terms
+            for term in (terms if terms else [','.join(pmids)])
     ]
 
+    if not terms:
+	template_args = [{key: value for key, value in a.items() \
+			  if key != 'term'} for a in template_args]
 
     response = app.response_class(
             response=json.dumps(template_args),
@@ -346,8 +359,13 @@ def hallmark_cooccurrences_by_pmids(pmids, hallmark_filter=None):
     total = db_controller.getTotalNumberOfSentences()
     data[None][None] = total
 
+    print data
+
     if hallmark_filter is not None:
         data = filter_cooccurrence_data(data, hallmark_filter.values())
+
+    print "filtered data"
+    print data
 
     debug('pmids cooccurrence data: {}'.format(data))
     return CountStats(data)
