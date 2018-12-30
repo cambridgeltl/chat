@@ -5,7 +5,7 @@ This is the main codebase for CHAT (http://chat.lionproject.net/)
 Please cite the following paper: 
 
 
-[Cancer Hallmarks Analytics Tool (CHAT): a text mining approach to organize and evaluate scientific literature on cancer](https://www.repository.cam.ac.uk/bitstream/handle/1810/265268/btx454.pdf?sequence=8&isAllowed=y)
+[Cancer Hallmarks Analytics Tool (CHAT): a text mining approach to organize and evaluate scientific literature on cancer](https://academic.oup.com/bioinformatics/article/33/24/3973/3965324)
 ```
 @article{baker2017cancer,
   title={Cancer Hallmarks Analytics Tool (CHAT): a text mining approach to organize and evaluate scientific literature on cancer},
