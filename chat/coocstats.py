@@ -52,7 +52,10 @@ class CountStats(object):
         return self.count(x, y) / self.count(None, y)
 
     def p_y_given_x(self, x, y):
-        return self.count(x, y) / self.count(x, None)
+
+        count = self.count(x, None)
+        if count == 0.0: return 0.0
+        return self.count(x, y) / count
 
     def pmi(self, x, y):
         """Return pointwise mutual information."""
